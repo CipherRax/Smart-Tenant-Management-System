@@ -1,12 +1,11 @@
-import React from 'react';
+import AnalyticsReport from  "@/components/AnalyticsDashboard"
 
 const Report = () => {
-    return (
-        <div>
-            <h1>Report page</h1>
+  return (
+    <>
+    <AnalyticsReport />
+    </>
+  )
+}
 
-        </div>
-    );
-};
-
-export default Report;
+export default Report

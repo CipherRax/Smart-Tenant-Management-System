@@ -1,11 +1,8 @@
-import React from 'react';
+import AIAssistant from '@/components/AI'; 
 
 const Page = () => {
     return (
-        <div>
-            <h1>AI PAGE</h1>
-
-        </div>
+      <AIAssistant />
     );
 };
 

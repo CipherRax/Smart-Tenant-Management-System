@@ -1,208 +1,828 @@
-'use client'
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
+// components/landlord-registration.tsx
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage 
+} from '@/components/ui/form';
 import {
-    Field,
-    FieldDescription,
-    FieldGroup,
-    FieldLabel,
-    FieldSeparator,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
-import {Dancing_Script, Great_Vibes} from "next/font/google";
-import Link from "next/link";
-import {useState} from "react";
-import { Eye, EyeOff } from "lucide-react";
+  Building,
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  AlertCircle,
+  ArrowLeft,
+  Shield,
+  Users,
+  Home,
+  Globe,
+  CreditCard,
+  FileText,
+  Upload,
+  MapPin,
+  Briefcase
+} from 'lucide-react';
 
-
-
-
-const dancing = Dancing_Script({
-    subsets: ["latin"],
-    weight: ["400", "700"],
+// Form validation schema
+const registrationSchema = z.object({
+  userType: z.enum(['landlord', 'property_manager'], {
+    required_error: "Please select your role",
+  }),
+  firstName: z.string()
+    .min(2, "First name must be at least 2 characters")
+    .max(50, "First name must be less than 50 characters"),
+  lastName: z.string()
+    .min(2, "Last name must be at least 2 characters")
+    .max(50, "Last name must be less than 50 characters"),
+  email: z.string()
+    .email("Please enter a valid email address"),
+  phone: z.string()
+    .min(10, "Phone number must be at least 10 digits")
+    .regex(/^[+]?[\d\s\-\(\)]+$/, "Please enter a valid phone number"),
+  password: z.string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
+    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
+  confirmPassword: z.string(),
+  companyName: z.string().optional(),
+  companyWebsite: z.string().url("Please enter a valid URL").optional().or(z.literal('')),
+  propertiesCount: z.enum(['1', '2-5', '6-10', '11-20', '21+']),
+  acceptTerms: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and conditions",
+  }),
+  marketingEmails: z.boolean().default(false),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords do not match",
+  path: ["confirmPassword"],
 });
 
-const vibes = Great_Vibes({
-    subsets: ["latin"],
-    weight: ["400"],
-});
+type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
+export default function LandlordRegistration() {
+  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedUserType, setSelectedUserType] = useState<'landlord' | 'property_manager' | null>(null);
 
-export function SignUpAdmin({className, ...props}: React.ComponentProps<"div">) {
+  const form = useForm<RegistrationFormValues>({
+    resolver: zodResolver(registrationSchema),
+    defaultValues: {
+      userType: 'landlord',
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      companyName: '',
+      companyWebsite: '',
+      propertiesCount: '1',
+      acceptTerms: false,
+      marketingEmails: false,
+    },
+  });
 
+  const userType = form.watch('userType');
+  const steps = [
+    { number: 1, title: 'Account Type', description: 'Select your role' },
+    { number: 2, title: 'Personal Info', description: 'Enter your details' },
+    { number: 3, title: 'Business Info', description: 'Company details' },
+    { number: 4, title: 'Security', description: 'Set password' },
+  ];
 
-    const [show, setShow] = useState(false)
+  const handleUserTypeSelect = (type: 'landlord' | 'property_manager') => {
+    setSelectedUserType(type);
+    form.setValue('userType', type);
+  };
 
-    return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
-            <Card className="overflow-hidden p-0">
-                <CardContent className="grid p-0 md:grid-cols-2">
-                    <form className="p-6 md:p-8">
-                        <FieldGroup>
-                            <div className="flex flex-col items-center gap-2 text-center">
-                                <h1 className={`text-2xl font-bold text-amber-800 ${dancing.className}`}>Hey There👋</h1>
-                                <p className={`text-2xl text-balance text-center text-amber-700/80 ${vibes.className}`}>
-                                    Create your <br/>Ellyon&apos;s apartments account as <strong>admin</strong>
-                                </p>
-                            </div>
-                            <Field>
-                                <FieldLabel htmlFor="email" className={`text-2xl ${dancing.className}`}>Full Name</FieldLabel>
-                                <Input
-                                    id="text"
-                                    type="text"
-                                    placeholder="Enter Full Name"
-                                    required
-                                />
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="email" className={`text-2xl ${dancing.className}`}>Phone Number</FieldLabel>
-                                <Input
-                                    id="number"
-                                    type="text"
-                                    placeholder="+254 12345678"
-                                    required
-                                />
-                            </Field>
-                            <Field>
-                                <FieldLabel htmlFor="email" className={`text-2xl ${dancing.className}`}>Email</FieldLabel>
-                                <Input
-                                    id="email"
-                                    type="email"
-                                    placeholder="ellyon@apartments.com"
-                                    required
-                                />
-                            </Field>
-                            <Field>
-                                <div className="mb-4">
-                                    <FieldLabel htmlFor="password" className={`text-2xl ${dancing.className}`}>
-                                        Password
-                                    </FieldLabel>
+  const handleNextStep = async () => {
+    let fieldsToValidate: (keyof RegistrationFormValues)[] = [];
+    
+    switch (currentStep) {
+      case 1:
+        fieldsToValidate = ['userType'];
+        break;
+      case 2:
+        fieldsToValidate = ['firstName', 'lastName', 'email', 'phone'];
+        break;
+      case 3:
+        fieldsToValidate = ['companyName', 'companyWebsite', 'propertiesCount'];
+        break;
+    }
 
-                                    <div className="relative w-full">
-                                        <Input
-                                            id="password"
-                                            type={show ? "text" : "password"}
-                                            className="pr-12"  // <-- gives space for the eye icon
-                                        />
+    const isValid = await form.trigger(fieldsToValidate);
+    if (isValid && currentStep < 4) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
 
-                                        <button
-                                            type="button"
-                                            onClick={() => setShow(!show)}
-                                            className="
-        absolute
-        right-3
-        top-1/2
-        -translate-y-1/2
-        text-gray-500
-        hover:text-gray-700
-        transition
-      "
-                                        >
-                                            {show ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-                                    </div>
-                                </div>
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
 
-                                {/*<Input id="password" type="password" required />*/}
-                            </Field>
+  const onSubmit = async (data: RegistrationFormValues) => {
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    console.log('Registration data:', data);
+    
+    // Store registration data
+    localStorage.setItem('registeredUser', JSON.stringify(data));
+    
+    // Redirect to verification or dashboard
+    router.push('/auth/verify');
+    
+    setIsSubmitting(false);
+  };
 
-                            <Field>
-                                <div className="mb-4">
-                                    <FieldLabel htmlFor="password" className={`text-2xl ${dancing.className}`}>
-                                        Confirm Password
-                                    </FieldLabel>
+  const getStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-2">Select Your Role</h3>
+              <p className="text-muted-foreground">
+                Choose the option that best describes you
+              </p>
+            </div>
 
-                                    <div className="relative w-full">
-                                        <Input
-                                            id="password"
-                                            type={show ? "text" : "password"}
-                                            className="pr-12"  // <-- gives space for the eye icon
-                                        />
-
-                                        <button
-                                            type="button"
-                                            onClick={() => setShow(!show)}
-                                            className="
-        absolute
-        right-3
-        top-1/2
-        -translate-y-1/2
-        text-gray-500
-        hover:text-gray-700
-        transition
-      "
-                                        >
-                                            {show ? <EyeOff size={20} /> : <Eye size={20} />}
-                                        </button>
-                                    </div>
-                                </div>
-
-                            </Field>
-                            <Field>
-                                <Link
-                                    href={"/login"}
-                                    className={`text-2xl ${dancing.className} ml-auto text-xl underline-offset-2 hover:underline`}
-                                >
-                                    have an account? just login
-                                </Link>
-                                <Button
-                                    className={
-                                        `text-2xl relative hover:bg-amber-500 active:scale-95 transition-all duration-200" +
-                        "fucus:outline-none rounded-r-lg ${dancing.className}`
-                                    }
-                                    type="submit">Create account</Button>
-                            </Field>
-                            <FieldSeparator className={`*:data-[slot=field-separator-content]:bg-card text-2xl ${vibes.className}`}>
-                                Or continue with
-                            </FieldSeparator>
-                            <Field className="grid grid-cols-3 gap-4">
-                                <Button variant="outline" type="button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path
-                                            d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"
-                                            fill="currentColor"
-                                        />
-                                    </svg>
-                                    <span className="sr-only">Login with Apple</span>
-                                </Button>
-                                <Button variant="outline" type="button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path
-                                            d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"
-                                            fill="currentColor"
-                                        />
-                                    </svg>
-                                    <span className="sr-only">Login with Google</span>
-                                </Button>
-                                <Button variant="outline" type="button">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                                        <path
-                                            d="M6.915 4.03c-1.968 0-3.683 1.28-4.871 3.113C.704 9.208 0 11.883 0 14.449c0 .706.07 1.369.21 1.973a6.624 6.624 0 0 0 .265.86 5.297 5.297 0 0 0 .371.761c.696 1.159 1.818 1.927 3.593 1.927 1.497 0 2.633-.671 3.965-2.444.76-1.012 1.144-1.626 2.663-4.32l.756-1.339.186-.325c.061.1.121.196.183.3l2.152 3.595c.724 1.21 1.665 2.556 2.47 3.314 1.046.987 1.992 1.22 3.06 1.22 1.075 0 1.876-.355 2.455-.843a3.743 3.743 0 0 0 .81-.973c.542-.939.861-2.127.861-3.745 0-2.72-.681-5.357-2.084-7.45-1.282-1.912-2.957-2.93-4.716-2.93-1.047 0-2.088.467-3.053 1.308-.652.57-1.257 1.29-1.82 2.05-.69-.875-1.335-1.547-1.958-2.056-1.182-.966-2.315-1.303-3.454-1.303zm10.16 2.053c1.147 0 2.188.758 2.992 1.999 1.132 1.748 1.647 4.195 1.647 6.4 0 1.548-.368 2.9-1.839 2.9-.58 0-1.027-.23-1.664-1.004-.496-.601-1.343-1.878-2.832-4.358l-.617-1.028a44.908 44.908 0 0 0-1.255-1.98c.07-.109.141-.224.211-.327 1.12-1.667 2.118-2.602 3.358-2.602zm-10.201.553c1.265 0 2.058.791 2.675 1.446.307.327.737.871 1.234 1.579l-1.02 1.566c-.757 1.163-1.882 3.017-2.837 4.338-1.191 1.649-1.81 1.817-2.486 1.817-.524 0-1.038-.237-1.383-.794-.263-.426-.464-1.13-.464-2.046 0-2.221.63-4.535 1.66-6.088.454-.687.964-1.226 1.533-1.533a2.264 2.264 0 0 1 1.088-.285z"
-                                            fill="currentColor"
-                                        />
-                                    </svg>
-                                    <span className="sr-only">Login with Meta</span>
-                                </Button>
-                            </Field>
-                            <FieldDescription className={`text-center text-2xl ${vibes.className}`}>
-                              need help creating an account? <a href="#">Contact Us</a>
-                            </FieldDescription>
-                        </FieldGroup>
-                    </form>
-                    <div className="bg-muted relative hidden md:block">
-                        <img
-                            src="/logo3.jpeg"
-                            alt="Image"
-                            className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
-                        />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Landlord Card */}
+              <Card 
+                className={`cursor-pointer transition-all border-2 hover:border-primary hover:shadow-lg ${
+                  selectedUserType === 'landlord' ? 'border-primary bg-primary/5' : 'border-gray-200'
+                }`}
+                onClick={() => handleUserTypeSelect('landlord')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className={`p-4 rounded-full ${
+                      selectedUserType === 'landlord' ? 'bg-primary/10' : 'bg-gray-100'
+                    }`}>
+                      <Home className={`h-8 w-8 ${
+                        selectedUserType === 'landlord' ? 'text-primary' : 'text-gray-400'
+                      }`} />
                     </div>
+                    <div>
+                      <h4 className="font-semibold text-lg">Landlord / Property Owner</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        I own one or more rental properties
+                      </p>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Manage your own properties</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Collect rent online</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Handle maintenance requests</span>
+                      </div>
+                    </div>
+                  </div>
                 </CardContent>
-            </Card>
-            <FieldDescription className="px-6 text-center">
-                By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
-                and <a href="#">Privacy Policy</a>.
-            </FieldDescription>
+              </Card>
+
+              {/* Property Manager Card */}
+              <Card 
+                className={`cursor-pointer transition-all border-2 hover:border-primary hover:shadow-lg ${
+                  selectedUserType === 'property_manager' ? 'border-primary bg-primary/5' : 'border-gray-200'
+                }`}
+                onClick={() => handleUserTypeSelect('property_manager')}
+              >
+                <CardContent className="pt-6">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className={`p-4 rounded-full ${
+                      selectedUserType === 'property_manager' ? 'bg-primary/10' : 'bg-gray-100'
+                    }`}>
+                      <Briefcase className={`h-8 w-8 ${
+                        selectedUserType === 'property_manager' ? 'text-primary' : 'text-gray-400'
+                      }`} />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-lg">Property Manager</h4>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        I manage properties for multiple owners
+                      </p>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Manage multiple properties</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Multi-owner support</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Advanced reporting</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="userType"
+              render={({ field }) => (
+                <FormItem className="hidden">
+                  <FormControl>
+                    <input type="hidden" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case 2:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-2">Personal Information</h3>
+              <p className="text-muted-foreground">
+                Enter your personal details
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>First Name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="John" className="pl-10" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Last Name</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="Doe" className="pl-10" {...field} />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        type="email" 
+                        placeholder="john.doe@example.com" 
+                        className="pl-10"
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    We'll send verification and important updates to this email
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="+1 (555) 123-4567" 
+                        className="pl-10"
+                        {...field} 
+                      />
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Used for urgent notifications and account recovery
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
+      case 3:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-2">Business Information</h3>
+              <p className="text-muted-foreground">
+                Tell us about your {userType === 'landlord' ? 'properties' : 'management business'}
+              </p>
+            </div>
+
+            {userType === 'property_manager' && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="companyName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company Name (Optional)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Your Property Management Company" 
+                            className="pl-10"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="companyWebsite"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Company Website (Optional)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="https://yourcompany.com" 
+                            className="pl-10"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
+            )}
+
+            <FormField
+              control={form.control}
+              name="propertiesCount"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    How many properties do you {userType === 'landlord' ? 'own' : 'currently manage'}?
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select number of properties" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="1">1 property</SelectItem>
+                      <SelectItem value="2-5">2-5 properties</SelectItem>
+                      <SelectItem value="6-10">6-10 properties</SelectItem>
+                      <SelectItem value="11-20">11-20 properties</SelectItem>
+                      <SelectItem value="21+">21+ properties</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    This helps us customize your experience
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <AlertCircle className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-blue-800">Professional Features</p>
+                  <ul className="text-sm text-blue-700 mt-1 list-disc list-inside space-y-1">
+                    <li>Add properties after registration</li>
+                    <li>Invite team members to your account</li>
+                    <li>Access advanced reporting tools</li>
+                    <li>24/7 priority support</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 4:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold mb-2">Account Security</h3>
+              <p className="text-muted-foreground">
+                Set a strong password to protect your account
+              </p>
+            </div>
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create a strong password"
+                        className="pl-10 pr-10"
+                        {...field} 
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormDescription>
+                    Must contain 8+ characters with uppercase, number, and special character
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="Confirm your password"
+                        className="pl-10 pr-10"
+                        {...field} 
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <FormField
+                  control={form.control}
+                  name="acceptTerms"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>
+                          I agree to the{' '}
+                          <Link href="/terms" className="text-primary hover:underline">
+                            Terms of Service
+                          </Link>{' '}
+                          and{' '}
+                          <Link href="/privacy" className="text-primary hover:underline">
+                            Privacy Policy
+                          </Link>
+                        </FormLabel>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="flex items-start space-x-3">
+                <FormField
+                  control={form.control}
+                  name="marketingEmails"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>
+                          Send me product updates, tips, and offers via email
+                        </FormLabel>
+                        <FormDescription className="text-xs">
+                          You can unsubscribe at any time
+                        </FormDescription>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex gap-3">
+                <Shield className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+                <div>
+                  <p className="font-medium text-yellow-800">Security Tips</p>
+                  <ul className="text-sm text-yellow-700 mt-1 list-disc list-inside space-y-1">
+                    <li>Use a unique password not used elsewhere</li>
+                    <li>Enable two-factor authentication after registration</li>
+                    <li>Never share your password with anyone</li>
+                    <li>Log out from shared devices</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+              <Building className="h-7 w-7 text-white" />
+            </div>
+            <div className="text-left">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Register as Landlord/Manager
+              </h1>
+              <p className="text-sm text-muted-foreground">Create your professional account</p>
+            </div>
+          </div>
         </div>
-    )
+
+        {/* Progress Steps */}
+        <div className="flex items-center justify-center mb-8">
+          <div className="flex items-center">
+            {steps.map((stepItem, index) => (
+              <div key={stepItem.number} className="flex items-center">
+                <div className={`flex flex-col items-center ${
+                  stepItem.number <= currentStep ? 'text-primary' : 'text-muted-foreground'
+                }`}>
+                  <div className={`h-10 w-10 rounded-full flex items-center justify-center border-2 ${
+                    stepItem.number <= currentStep ? 'border-primary bg-primary/10' : 'border-muted-foreground'
+                  }`}>
+                    {stepItem.number}
+                  </div>
+                  <span className="text-sm mt-2 hidden md:block">{stepItem.title}</span>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className={`h-1 w-16 ${
+                    stepItem.number < currentStep ? 'bg-primary' : 'bg-gray-300'
+                  }`} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <Card className="border-0 shadow-2xl">
+              <CardHeader>
+                <CardTitle className="text-center">
+                  {currentStep === 1 && 'Select Account Type'}
+                  {currentStep === 2 && 'Personal Information'}
+                  {currentStep === 3 && 'Business Details'}
+                  {currentStep === 4 && 'Account Security'}
+                </CardTitle>
+                <CardDescription className="text-center">
+                  {currentStep === 1 && 'Choose the role that fits you best'}
+                  {currentStep === 2 && 'Enter your personal details to continue'}
+                  {currentStep === 3 && 'Tell us about your properties or business'}
+                  {currentStep === 4 && 'Set up a secure password for your account'}
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="pt-6">
+                {getStepContent()}
+              </CardContent>
+
+              <CardFooter className="flex flex-col space-y-4">
+                <div className="flex justify-between w-full">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    onClick={handlePreviousStep}
+                    disabled={currentStep === 1}
+                  >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Previous
+                  </Button>
+
+                  {currentStep < 4 ? (
+                    <Button
+                      type="button"
+                      onClick={handleNextStep}
+                      disabled={!selectedUserType && currentStep === 1}
+                    >
+                      Next: {steps[currentStep].title}
+                      <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="min-w-[120px]"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                          Creating Account...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Complete Registration
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+
+                {currentStep === 4 && (
+                  <div className="text-center w-full pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      By completing registration, you agree to our{' '}
+                      <Link href="/terms" className="text-primary hover:underline">
+                        Terms of Service
+                      </Link>{' '}
+                      and{' '}
+                      <Link href="/privacy" className="text-primary hover:underline">
+                        Privacy Policy
+                      </Link>
+                    </p>
+                  </div>
+                )}
+
+                <Separator />
+
+                <div className="text-center w-full">
+                  <p className="text-sm text-muted-foreground">
+                    Already have an account?{' '}
+                    <Link href="/auth/login" className="text-primary font-medium hover:underline">
+                      Sign in here
+                    </Link>
+                  </p>
+                </div>
+              </CardFooter>
+            </Card>
+          </form>
+        </Form>
+
+        {/* Features Section */}
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-50 to-white">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <CreditCard className="h-5 w-5 text-blue-600" />
+                </div>
+                <h3 className="font-semibold">Online Rent Collection</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Accept rent payments online with automated reminders and receipts
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-50 to-white">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-purple-100 rounded-lg">
+                  <FileText className="h-5 w-5 text-purple-600" />
+                </div>
+                <h3 className="font-semibold">Digital Documentation</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Store leases, contracts, and important documents securely in the cloud
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm bg-gradient-to-br from-green-50 to-white">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-2 bg-green-100 rounded-lg">
+                  <Users className="h-5 w-5 text-green-600" />
+                </div>
+                <h3 className="font-semibold">Tenant Communication</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Message tenants directly and manage maintenance requests efficiently
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Security Footer */}
+        <div className="mt-8 text-center">
+          <div className="inline-flex items-center gap-2 bg-gray-50 px-4 py-2 rounded-full">
+            <Shield className="h-4 w-4 text-green-600" />
+            <span className="text-sm text-muted-foreground">
+              Your data is encrypted and secured with bank-level security
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mt-4">
+            © {new Date().getFullYear()} TenantFlow. All property management rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }

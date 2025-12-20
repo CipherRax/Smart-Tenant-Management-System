@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28dashboard%29/Dashboard/profile/page.tsx"],"sourcesContent":["import ProfileAdmin from \"@/components/profileAdminrofileAdmin\";\n\n\nconst ProfilePage = () => {\n    return (\n        <>\n        <ProfileAdmin />\n        </>\n    );\n};\n\nexport default ProfilePage;"],"names":[],"mappings":";;;;;;;;;;;;AAGA,MAAM,cAAc;IAChB,qBACI;kBACA,cAAA,8OAAC;;;;;;AAGT;uCAEe"}}]
+}

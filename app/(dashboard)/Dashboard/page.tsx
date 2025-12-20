@@ -1,11 +1,15 @@
-import React from 'react';
+import TenantManagement from '@/components/TableDashboard';
 
 const Dashboard = () => {
     return (
-        <div>
-            <h1>Dashboard</h1>
-
-        </div>
+        <>
+        {/* NavbarForMainDashboard */}
+        {/* Title */}
+        {/* Table body */} 
+        <TenantManagement />
+        
+        {/* Footer */}
+        </>
     );
 };
 

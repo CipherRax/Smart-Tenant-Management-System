@@ -1,10 +1,10 @@
-import React from 'react';
+import AdminNotificationCenter from '@/components/AdminNotifications'
 
 const Notification = () => {
     return (
-        <div>
-            <h1>Notification page</h1>
-        </div>
+        <>
+            <AdminNotificationCenter />
+        </>
     );
 };
 

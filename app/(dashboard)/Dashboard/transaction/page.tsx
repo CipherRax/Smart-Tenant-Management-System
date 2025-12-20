@@ -1,10 +1,7 @@
-import React from 'react';
-
+import   TransactionHistory from "@/components/Transaction";
 const Transaction = () => {
     return (
-        <div>
-            <h1>Transactions</h1>
-        </div>
+        <TransactionHistory />
     );
 };
 

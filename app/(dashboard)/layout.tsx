@@ -1,4 +1,4 @@
-import "../globals.css";
+import "./globals.css";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import React from "react";

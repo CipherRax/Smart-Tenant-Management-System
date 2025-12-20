@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28dashboard%29/Dashboard/monitor/page.tsx"],"sourcesContent":["import React from 'react';\n\nconst Monitor = () => {\n    return (\n        <div>\n            <h2>Monitor</h2>\n\n        </div>\n    );\n};\n\nexport default Monitor;"],"names":[],"mappings":";;;;;;AAEA,MAAM,UAAU;IACZ,qBACI,8OAAC;kBACG,cAAA,8OAAC;sBAAG;;;;;;;;;;;AAIhB;uCAEe"}}]
+}

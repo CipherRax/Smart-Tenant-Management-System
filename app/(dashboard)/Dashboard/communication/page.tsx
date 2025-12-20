@@ -1,11 +1,13 @@
-import React from 'react';
+import AdminCommunication from "@/components/CommunicationAdmin";
+
+
+
 
 const Communication = () => {
     return (
-        <div>
-            <h1>Communication</h1>
-
-        </div>
+       <>
+       <AdminCommunication />
+       </>
     );
 };
 

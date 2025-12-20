@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28dashboard%29/Dashboard/Billing/page.tsx"],"sourcesContent":["import BillingSystem from \"@/components/Billing\";\n\n\n\n\nconst Billing = () => {\n    return (\n        <div>\n            <h1>Billing page</h1>\n        </div>\n    );\n};\n\nexport default Billing;"],"names":[],"mappings":";;;;;;AAKA,MAAM,UAAU;IACZ,qBACI,8OAAC;kBACG,cAAA,8OAAC;sBAAG;;;;;;;;;;;AAGhB;uCAEe"}}]
+}

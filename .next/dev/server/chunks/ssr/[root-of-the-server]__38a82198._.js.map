@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28dashboard%29/Dashboard/notifications/page.tsx"],"sourcesContent":["import AdminNotificationCenter from '@/components/AdminNotifications'\n\nconst Notification = () => {\n    return (\n        <div>\n            <h1>Notification page</h1>\n        </div>\n    );\n};\n\nexport default Notification;"],"names":[],"mappings":";;;;;;AAEA,MAAM,eAAe;IACjB,qBACI,8OAAC;kBACG,cAAA,8OAAC;sBAAG;;;;;;;;;;;AAGhB;uCAEe"}}]
+}

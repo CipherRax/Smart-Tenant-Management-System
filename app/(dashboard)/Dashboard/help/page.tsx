@@ -1,11 +1,8 @@
-import React from 'react';
+import AdminHelpCenter from "@/components/AdminHelp";
 
 const Help = () => {
     return (
-        <div>
-            <h1>Help page</h1>
-
-        </div>
+        <AdminHelpCenter />
     );
 };
 

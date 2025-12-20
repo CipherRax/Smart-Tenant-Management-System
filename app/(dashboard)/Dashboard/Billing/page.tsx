@@ -1,10 +1,11 @@
-import React from 'react';
+import BillingSystem from "@/components/Billing";
+
+
+
 
 const Billing = () => {
     return (
-        <div>
-            <h1>Billing page</h1>
-        </div>
+      <BillingSystem />
     );
 };
 

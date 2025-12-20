@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 26, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28dashboard%29/Dashboard/communication/page.tsx"],"sourcesContent":["\nconst Communication = () => {\n    return (\n       <>\n       <AdminCommunication />\n       </>\n    );\n};\n\nexport default Communication;"],"names":[],"mappings":";;;;;;AACA,MAAM,gBAAgB;IAClB,qBACG;kBACA,cAAA,8OAAC;;;;;;AAGR;uCAEe"}}]
+}

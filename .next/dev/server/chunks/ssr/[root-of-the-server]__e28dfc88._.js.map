@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28users%29/users/page.tsx"],"sourcesContent":["import React from 'react';\n\nconst Page = () => {\n    return (\n        <div>\n            <h1>Dashboard for users</h1>\n\n        </div>\n    );\n};\n\nexport default Page;"],"names":[],"mappings":";;;;;;AAEA,MAAM,OAAO;IACT,qBACI,8OAAC;kBACG,cAAA,8OAAC;sBAAG;;;;;;;;;;;AAIhB;uCAEe"}}]
+}

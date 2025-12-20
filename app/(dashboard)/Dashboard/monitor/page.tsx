@@ -1,11 +1,8 @@
-import React from 'react';
+import CCTVMonitor from '@/components/Monitor';
 
 const Monitor = () => {
     return (
-        <div>
-            <h2>Monitor</h2>
-
-        </div>
+        <CCTVMonitor />
     );
 };
 

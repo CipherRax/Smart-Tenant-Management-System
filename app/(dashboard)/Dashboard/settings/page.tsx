@@ -1,10 +1,8 @@
-import React from 'react';
+import AdminSettings from "@/components/AdminSettings";
 
 const Settings = () => {
     return (
-        <div>
-            <h1>Settings page</h1>
-        </div>
+       <AdminSettings />
     );
 };
 

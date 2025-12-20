@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28users%29/users/page.tsx"],"sourcesContent":["import Home from '@/app/(users)/users/uhome/UHome';\n\nconst Page = () => {\n    return (\n      <>\n      <Home />\n      </>\n    );\n};\n\nexport default Page;"],"names":[],"mappings":";;;;;;;;;;;;AAEA,MAAM,OAAO;IACT,qBACE;kBACA,cAAA,8OAAC;;;;;;AAGP;uCAEe"}}]
+}

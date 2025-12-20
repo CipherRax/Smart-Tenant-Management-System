@@ -1,12 +1,11 @@
+import { ProfileAdmin } from "@/components/ProfileAdmin";
+
 
 const ProfilePage = () => {
     return (
-        <div>
-            <h1>profile Page</h1>
-
-
-
-        </div>
+        <>
+        <ProfileAdmin />
+        </>
     );
 };
 

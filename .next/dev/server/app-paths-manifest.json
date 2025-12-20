@@ -1,0 +1,14 @@
+{
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(auth)/signIn/page": "app/(auth)/signIn/page.js",
+  "/(dashboard)/Dashboard/Billing/page": "app/(dashboard)/Dashboard/Billing/page.js",
+  "/(dashboard)/Dashboard/communication/page": "app/(dashboard)/Dashboard/communication/page.js",
+  "/(dashboard)/Dashboard/notifications/page": "app/(dashboard)/Dashboard/notifications/page.js",
+  "/(dashboard)/Dashboard/page": "app/(dashboard)/Dashboard/page.js",
+  "/(dashboard)/Dashboard/profile/page": "app/(dashboard)/Dashboard/profile/page.js",
+  "/(dashboard)/Dashboard/report/page": "app/(dashboard)/Dashboard/report/page.js",
+  "/(dashboard)/Dashboard/transaction/page": "app/(dashboard)/Dashboard/transaction/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/options/page": "app/options/page.js",
+  "/page": "app/page.js"
+}

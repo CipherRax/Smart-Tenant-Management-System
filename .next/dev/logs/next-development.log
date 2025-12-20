@@ -6257,3 +6257,2129 @@ Expected ',', got 'const'
 [01:33:57.910] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
 [01:34:09.571] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [01:38:56.689] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:54:18.574] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:57:46.418] Server  LOG      ✓ Compiled in 5.6s
+[01:58:30.974] Browser ERROR   ./app/(dashboard)/layout.tsx:18:17
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <
+> 18 |                 </main>
+     |                 ^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Expression expected
+[01:58:30.974] Browser ERROR   ./app/(dashboard)/layout.tsx:18:18
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <
+> 18 |                 </main>
+     |                  ^^^^^^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Unterminated regexp literal
+[01:58:32.965] Browser ERROR   ./app/(dashboard)/layout.tsx:18:17
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyF
+> 18 |                 </main>
+     |                 ^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Expression expected
+[01:58:32.966] Browser ERROR   ./app/(dashboard)/layout.tsx:18:18
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyF
+> 18 |                 </main>
+     |                  ^^^^^^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Unterminated regexp literal
+[01:58:47.960] Browser ERROR   ./app/(dashboard)/layout.tsx:18:17
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyFo
+> 18 |                 </main>
+     |                 ^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Expression expected
+[01:58:47.960] Browser ERROR   ./app/(dashboard)/layout.tsx:18:18
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyFo
+> 18 |                 </main>
+     |                  ^^^^^^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Unterminated regexp literal
+[01:58:53.963] Browser ERROR   ./app/(dashboard)/layout.tsx:18:17
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyFoo
+> 18 |                 </main>
+     |                 ^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Expression expected
+[01:58:53.963] Browser ERROR   ./app/(dashboard)/layout.tsx:18:18
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyFoo
+> 18 |                 </main>
+     |                  ^^^^^^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Unterminated regexp literal
+[01:59:04.976] Browser ERROR   ./app/(dashboard)/layout.tsx:18:17
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyFoooter
+> 18 |                 </main>
+     |                 ^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Expression expected
+[01:59:04.976] Browser ERROR   ./app/(dashboard)/layout.tsx:18:18
+Parsing ecmascript source code failed
+  16 |                     {children}
+  17 |                     <MyFoooter
+> 18 |                 </main>
+     |                  ^^^^^^
+  19 |             </div>
+  20 |         </SidebarProvider>
+  21 |     );
+
+Unterminated regexp literal
+[01:59:10.118] Server  LOG      ✓ Compiled in 4.5s
+[01:59:12.311] Server  ERROR    ⨯ ReferenceError: MyFoooter is not defined
+[01:59:12.879] Server  ERROR    ⨯ ReferenceError: MyFoooter is not defined
+[01:59:14.009] Server  ERROR    ⨯ ReferenceError: MyFoooter is not defined
+[01:59:15.950] Server  ERROR    ⨯ ./app/(dashboard)/layout.tsx:7:1
+Parsing ecmascript source code failed
+   5 | import 
+   6 |
+>  7 | export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+     | ^^^^^^
+   8 |     return (
+   9 |         <SidebarProvider>
+  10 |             <div className="flex h-screen">
+
+Expected 'from', got 'export'
+
+
+[01:59:17.010] Browser ERROR   ./app/(dashboard)/layout.tsx:7:1
+Parsing ecmascript source code failed
+   5 | import 
+   6 |
+>  7 | export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+     | ^^^^^^
+   8 |     return (
+   9 |         <SidebarProvider>
+  10 |             <div className="flex h-screen">
+
+Expected 'from', got 'export'
+[01:59:18.995] Server  LOG      ○ Compiling /_error ...
+[01:59:41.421] Server  LOG      ✓ Compiled in 25.4s
+[02:00:03.698] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:08.275] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:12.521] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:15.977] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:21.441] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:24.056] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:27.348] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:30.476] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:33.204] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:36.806] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:41.506] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:45.451] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:49.521] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:52.810] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:00:56.654] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:00.668] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:04.720] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:08.852] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:13.317] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:19.075] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:23.324] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:28.905] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:33.899] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:43.264] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:43.916] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:43.917] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:01:43.917] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:43.917] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:01:43.949] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:43.949] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:01:46.493] Server  ERROR    ⨯ ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+
+
+
+./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+
+
+[02:01:46.758] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:46.759] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:01:46.874] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:46.875] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:01:46.999] Server  ERROR    ⨯ ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+
+
+
+./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+
+
+[02:01:47.302] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:47.302] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:01:47.466] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:47.466] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:01:54.557] Server  ERROR    ⨯ ReferenceError: Footer is not defined
+[02:01:59.309] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:01:59.415] Server  LOG      ✓ Compiled in 4s
+[02:01:59.681] Browser ERROR   ./app/layout.tsx:32:9
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |         ^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Expression expected
+[02:01:59.682] Browser ERROR   ./app/layout.tsx:32:10
+Parsing ecmascript source code failed
+  30 |         {children}
+  31 |         <Footer
+> 32 |         </body>
+     |          ^^^^^^
+  33 |         </html>
+  34 |     );
+  35 | }
+
+Unterminated regexp literal
+[02:02:02.272] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:02.679] Server  ERROR    ⨯ ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+
+
+[02:02:03.130] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:03.130] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:03.130] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:03.249] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:03.370] Server  ERROR    ⨯ ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+
+
+[02:02:03.801] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:04.100] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:04.101] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:04.255] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:05.725] Server  ERROR    ⨯ ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+
+
+[02:02:05.948] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:05.948] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Expected 'from', got 'const'
+[02:02:06.103] Server  ERROR    ⨯ ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+
+
+[02:02:06.137] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:06.268] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:06.360] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:06.548] Server  ERROR    ⨯ ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+
+
+[02:02:06.741] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.239] Browser ERROR   uncaughtError: Error: ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+
+
+[02:02:09.893] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.894] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:09.895] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:10.102] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:11.451] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.485] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.510] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.522] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.641] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.649] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.664] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.674] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.693] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:11.719] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.152] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.155] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.163] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.170] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.176] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.186] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.197] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.200] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.270] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.273] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.294] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.318] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.370] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.414] Server  ERROR    ⨯ ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:02:12.739] Browser ERROR   ./app/layout.tsx:4:1
+Module not found: Can't resolve ''
+  2 | import { Geist, Geist_Mono } from "next/font/google";
+  3 | import "./globals.css";
+> 4 | import Footer from ''
+    | ^^^^^^^^^^^^^^^^^^^^^
+  5 |
+  6 | const geistSans = Geist({
+  7 |     variable: "--font-geist-sans",
+
+https://nextjs.org/docs/messages/module-not-found
+[02:02:12.739] Browser ERROR   ./app/layout.tsx:6:1
+Parsing ecmascript source code failed
+  4 | import Footer from 
+  5 |
+> 6 | const geistSans = Geist({
+    | ^^^^^
+  7 |     variable: "--font-geist-sans",
+  8 |     subsets: ["latin"],
+  9 | });
+
+Unexpected token `const`. Expected a string literal
+[02:02:40.741] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:02:44.512] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:02:44.718] Server  LOG      ✓ Compiled in 15.8s
+[02:02:54.995] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:03:00.416] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:03:01.449] Browser ERROR   uncaughtError: Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:03:34.590] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:03:42.529] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:03:57.524] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:03:58.261] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:03:58.261] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:03:58.261] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:03:58.261] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:03:58.261] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:04:01.887] Browser ERROR   uncaughtError: Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:04:02.182] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:04:02.182] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:04:02.182] Browser ERROR   ./app/layout.tsx:17:14
+Ecmascript file had an error
+  15 | });
+  16 |
+> 17 | export const metadata: Metadata = {
+     |              ^^^^^^^^
+  18 |     title: "Tenant Management",
+  19 |     description: "Generated by create next app",
+  20 | };
+
+You are attempting to export "metadata" from a component marked with "use client", which is disallowed. Either remove the export, or the "use client" directive. Read more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+Import traces:
+  Client Component Browser:
+    ./app/layout.tsx [Client Component Browser]
+    ./app/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/layout.tsx [Client Component SSR]
+    ./app/layout.tsx [Server Component]
+[02:05:51.916] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:05:52.018] Server  LOG      ✓ Compiled in 16.5s
+[02:05:56.588] Server  LOG      ✓ Compiled in 7ms
+[02:05:56.596] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:05:59.142] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:06:04.443] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:06:05.445] Browser ERROR   uncaughtError: Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:06:45.661] Server  ERROR    ⨯ Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:06:45.788] Server  LOG      ✓ Compiled in 0ms
+[02:06:48.685] Server  LOG      ✓ Compiled in 10.3s
+[02:06:49.173] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:06:51.263] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:06:51.523] Server  LOG      ✓ Compiled in 76ms
+[02:06:52.722] Browser ERROR   uncaughtError: Error: Event handlers cannot be passed to Client Component props.
+  <button data-slot="button" className=... onClick={function onClick} children=...>
+                                                   ^^^^^^^^^^^^^^^^^^
+If you need interactivity, consider converting part of this to a Client Component.
+[02:07:39.162] Server  LOG      ✓ Compiled in 10.2s
+[02:07:39.164] Server  WARN     ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+[02:07:53.848] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:08:19.658] Server  LOG      ✓ Compiled in 2.4s
+[02:08:41.243] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:08:55.551] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:10:09.333] Server  LOG      ✓ Compiled in 14.8s
+[02:10:21.425] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:10:31.699] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:11:02.347] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:11:25.582] Server  LOG      ✓ Compiled in 11.1s
+[02:11:36.007] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:12:41.623] Server  LOG      ✓ Compiled in 0ms
+[02:12:49.290] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:13:04.793] Server  LOG      ✓ Compiled in 9.8s
+[02:13:05.435] Server  LOG      ✓ Compiled in 3ms
+[02:13:14.807] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:13:39.041] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:14:30.986] Server  LOG      ✓ Compiled in 3.3s
+[02:14:31.590] Browser ERROR   ./app/page.tsx:744:5
+Parsing ecmascript source code failed
+  742 |
+  743 |       <Foo
+> 744 |     </div>
+      |     ^
+  745 |   );
+  746 | }
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[02:14:31.590] Browser ERROR   ./app/page.tsx:744:6
+Parsing ecmascript source code failed
+  742 |
+  743 |       <Foo
+> 744 |     </div>
+      |      ^^^^^
+  745 |   );
+  746 | }
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[02:14:35.199] Browser ERROR   ./app/page.tsx:744:5
+Parsing ecmascript source code failed
+  742 |
+  743 |       <Foote
+> 744 |     </div>
+      |     ^
+  745 |   );
+  746 | }
+
+Expression expected
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[02:14:35.199] Browser ERROR   ./app/page.tsx:744:6
+Parsing ecmascript source code failed
+  742 |
+  743 |       <Foote
+> 744 |     </div>
+      |      ^^^^^
+  745 |   );
+  746 | }
+
+Unterminated regexp literal
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+[02:14:48.081] Server  LOG      ✓ Compiled in 4.3s
+[02:14:51.375] Browser ERROR   uncaughtError: ReferenceError: Footer is not defined
+[02:15:09.717] Browser ERROR   ./app/page.tsx:5:1
+Parsing ecmascript source code failed
+  3 |
+  4 | import 
+> 5 | import Link from 'next/link';
+    | ^^^^^^
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+  8 | import { Separator } from '@/components/ui/separator';
+
+Expected 'from', got 'import'
+[02:15:11.075] Server  ERROR    ⨯ ./app/page.tsx:5:1
+Parsing ecmascript source code failed
+  3 |
+  4 | import 
+> 5 | import Link from 'next/link';
+    | ^^^^^^
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+  8 | import { Separator } from '@/components/ui/separator';
+
+Expected 'from', got 'import'
+
+
+[02:15:11.405] Browser ERROR   ./app/page.tsx:5:1
+Parsing ecmascript source code failed
+  3 |
+  4 | import 
+> 5 | import Link from 'next/link';
+    | ^^^^^^
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+  8 | import { Separator } from '@/components/ui/separator';
+
+Expected 'from', got 'import'
+[02:15:11.581] Browser ERROR   ./app/page.tsx:5:1
+Parsing ecmascript source code failed
+  3 |
+  4 | import 
+> 5 | import Link from 'next/link';
+    | ^^^^^^
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+  8 | import { Separator } from '@/components/ui/separator';
+
+Expected 'from', got 'import'
+[02:15:11.714] Browser ERROR   ./app/page.tsx:5:1
+Parsing ecmascript source code failed
+  3 |
+  4 | import 
+> 5 | import Link from 'next/link';
+    | ^^^^^^
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+  8 | import { Separator } from '@/components/ui/separator';
+
+Expected 'from', got 'import'
+[02:15:15.452] Browser ERROR   uncaughtError: Error: ./app/page.tsx:5:1
+Parsing ecmascript source code failed
+  3 |
+  4 | import 
+> 5 | import Link from 'next/link';
+    | ^^^^^^
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+  8 | import { Separator } from '@/components/ui/separator';
+
+Expected 'from', got 'import'
+
+
+[02:15:16.067] Browser ERROR   ./app/page.tsx:5:1
+Parsing ecmascript source code failed
+  3 |
+  4 | import 
+> 5 | import Link from 'next/link';
+    | ^^^^^^
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+  8 | import { Separator } from '@/components/ui/separator';
+
+Expected 'from', got 'import'
+[02:15:17.059] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@comp'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@comp'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:17.257] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@comp'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@comp'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:17.285] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@comp'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@comp'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:17.328] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@comp'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@comp'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:17.536] Browser ERROR   ./app/page.tsx:4:1
+Module not found: Can't resolve '@comp'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@comp'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[02:15:21.582] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:21.850] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:22.306] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:22.652] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:23.326] Browser ERROR   ./app/page.tsx:4:1
+Module not found: Can't resolve '@compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[02:15:30.351] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './compo' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:30.563] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './compo' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:30.710] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './compo' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:31.190] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './compo' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:31.662] Browser ERROR   ./app/page.tsx:4:1
+Module not found: Can't resolve '@/compo'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/compo'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './compo' inside of [project]/
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[02:15:34.050] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/components/'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/components/'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './components/' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:34.287] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/components/'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/components/'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './components/' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:34.602] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/components/'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/components/'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './components/' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:34.825] Server  ERROR    ⨯ ./app/page.tsx:4:1
+Module not found: Can't resolve '@/components/'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/components/'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './components/' inside of [project]/
+
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[02:15:35.246] Browser ERROR   ./app/page.tsx:4:1
+Module not found: Can't resolve '@/components/'
+  2 | 'use client';
+  3 |
+> 4 | import Footer from '@/components/'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import Link from 'next/link';
+  6 | import { Button } from '@/components/ui/button';
+  7 | import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+Import map: aliased to relative './components/' inside of [project]/
+
+Import traces:
+  Client Component Browser:
+    ./app/page.tsx [Client Component Browser]
+    ./app/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/page.tsx [Client Component SSR]
+    ./app/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+[02:15:42.518] Server  LOG      ✓ Compiled in 3.5s
+[02:15:53.932] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:16:05.387] Server  LOG      ✓ Compiled in 3.5s
+[02:17:12.446] Server  LOG      ✓ Compiled in 4.3s
+[02:17:41.948] Server  LOG      ✓ Compiled in 4.5s
+[02:18:46.976] Server  LOG      ○ Compiling /users ...
+[02:18:56.159] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:19:08.673] Server  LOG      ○ Compiling /users/communication ...
+[02:19:22.928] Server  LOG      ○ Compiling /users/report ...
+[02:19:44.877] Server  LOG      ○ Compiling /users/rent ...

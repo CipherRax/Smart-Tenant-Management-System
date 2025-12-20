@@ -8,6 +8,10 @@
   "/(dashboard)/Dashboard/profile/page": "app/(dashboard)/Dashboard/profile/page.js",
   "/(dashboard)/Dashboard/report/page": "app/(dashboard)/Dashboard/report/page.js",
   "/(dashboard)/Dashboard/transaction/page": "app/(dashboard)/Dashboard/transaction/page.js",
+  "/(users)/users/communication/page": "app/(users)/users/communication/page.js",
+  "/(users)/users/page": "app/(users)/users/page.js",
+  "/(users)/users/rent/page": "app/(users)/users/rent/page.js",
+  "/(users)/users/report/page": "app/(users)/users/report/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/options/page": "app/options/page.js",
   "/page": "app/page.js"

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import Footer from '@/components/MyFooter';
 import {
   Home,
   Shield,
@@ -668,75 +669,8 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t bg-gray-50">
-        <div className="container mx-auto px-4 md:px-6 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
-                  <Home className="h-5 w-5 text-white" />
-                </div>
-                <h3 className="text-xl font-bold">TenantFlow</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Modern tenant management platform for landlords and property managers.
-              </p>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#features" className="text-muted-foreground hover:text-primary">Features</a></li>
-                <li><a href="/auth/signup" className="text-muted-foreground hover:text-primary">Sign Up</a></li>
-                <li><a href="/auth/login" className="text-muted-foreground hover:text-primary">Login</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary">Pricing</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-muted-foreground hover:text-primary">About Us</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary">Blog</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary">Careers</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary">Contact</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary">Terms of Service</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary">Cookie Policy</a></li>
-                <li><a href="#" className="text-muted-foreground hover:text-primary">GDPR</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <Separator className="my-8" />
-          
-          <div className="flex flex-col md:flex-row items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} TenantFlow. All rights reserved.
-            </p>
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-              <Button variant="ghost" size="sm" asChild>
-                <Link href="/auth/login">
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Login
-                </Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href="/auth/signup">
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Get Started
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </footer>
+
+      <Footer />
     </div>
   );
 }

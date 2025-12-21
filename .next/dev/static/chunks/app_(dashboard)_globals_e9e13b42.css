@@ -647,10 +647,6 @@
     top: calc(var(--spacing) * 2);
   }
 
-  .top-3 {
-    top: calc(var(--spacing) * 3);
-  }
-
   .top-3\.5 {
     top: calc(var(--spacing) * 3.5);
   }
@@ -899,10 +895,6 @@
 
   .mr-2 {
     margin-right: calc(var(--spacing) * 2);
-  }
-
-  .mr-3 {
-    margin-right: calc(var(--spacing) * 3);
   }
 
   .mb-1 {
@@ -1180,10 +1172,6 @@
     height: 70vh;
   }
 
-  .h-\[80vh\] {
-    height: 80vh;
-  }
-
   .h-\[250px\] {
     height: 250px;
   }
@@ -1238,10 +1226,6 @@
 
   .max-h-\(--radix-select-content-available-height\) {
     max-height: var(--radix-select-content-available-height);
-  }
-
-  .max-h-40 {
-    max-height: calc(var(--spacing) * 40);
   }
 
   .max-h-48 {
@@ -1406,10 +1390,6 @@
 
   .w-\[100px\] {
     width: 100px;
-  }
-
-  .w-\[150px\] {
-    width: 150px;
   }
 
   .w-\[180px\] {
@@ -2018,16 +1998,8 @@
     border-top-right-radius: var(--radius);
   }
 
-  .rounded-br-md {
-    border-bottom-right-radius: calc(var(--radius)  - 2px);
-  }
-
   .rounded-br-none {
     border-bottom-right-radius: 0;
-  }
-
-  .rounded-bl-md {
-    border-bottom-left-radius: calc(var(--radius)  - 2px);
   }
 
   .rounded-bl-none {
@@ -2097,11 +2069,6 @@
   .border-l-0 {
     border-left-style: var(--tw-border-style);
     border-left-width: 0;
-  }
-
-  .border-l-4 {
-    border-left-style: var(--tw-border-style);
-    border-left-width: 4px;
   }
 
   .border-dashed {
@@ -2241,10 +2208,6 @@
 
   .border-t-transparent {
     border-top-color: #0000;
-  }
-
-  .border-l-primary {
-    border-left-color: var(--primary);
   }
 
   .border-l-transparent {
@@ -5252,12 +5215,6 @@
   }
 
   @media (min-width: 48rem) {
-    .md\:mt-0 {
-      margin-top: calc(var(--spacing) * 0);
-    }
-  }
-
-  @media (min-width: 48rem) {
     .md\:block {
       display: block;
     }
@@ -5288,20 +5245,8 @@
   }
 
   @media (min-width: 48rem) {
-    .md\:w-80 {
-      width: calc(var(--spacing) * 80);
-    }
-  }
-
-  @media (min-width: 48rem) {
     .md\:w-auto {
       width: auto;
-    }
-  }
-
-  @media (min-width: 48rem) {
-    .md\:max-w-md {
-      max-width: var(--container-md);
     }
   }
 
@@ -5500,12 +5445,6 @@
   @media (min-width: 64rem) {
     .lg\:w-fit {
       width: fit-content;
-    }
-  }
-
-  @media (min-width: 64rem) {
-    .lg\:max-w-lg {
-      max-width: var(--container-lg);
     }
   }
 

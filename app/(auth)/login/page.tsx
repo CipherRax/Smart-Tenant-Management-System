@@ -1,7 +1,7 @@
 // components/pre-login-selector.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,12 +9,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Building, Home, Search, MapPin, Users, ArrowRight, LogIn, UserPlus, Eye, EyeOff } from 'lucide-react';
+import { Building, Home, Search, MapPin, Users, ArrowRight, LogIn, UserPlus, Eye, EyeOff, Shield } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
-import { Shield } from "lucide-react";
+import { createClient } from '@/lib/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from "sonner"
 
-// Mock apartment/property data
+
+// Mock apartment/property data (replace with actual Supabase data)
 const mockProperties = [
   {
     id: 'prop-001',
@@ -91,6 +95,8 @@ const mockUnits = {
 
 export default function PreLoginSelector() {
   const router = useRouter();
+  // const { toast } = useToast();
+  const { user, isLoading: authLoading } = useAuth();
   const [step, setStep] = useState<'property' | 'unit' | 'login' | 'signup'>('property');
   const [selectedProperty, setSelectedProperty] = useState<string>('');
   const [selectedUnit, setSelectedUnit] = useState<string>('');
@@ -99,6 +105,38 @@ export default function PreLoginSelector() {
   const [loginPassword, setLoginPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const supabase = createClient();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !authLoading) {
+      // Check if user is admin or tenant and redirect accordingly
+      const checkUserRole = async () => {
+        const { data: adminData } = await supabase
+          .from('admin')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (adminData) {
+          router.push('/dashboard');
+        } else {
+          const { data: tenantData } = await supabase
+            .from('tenants')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+
+          if (tenantData) {
+            router.push('/users/uhome');
+          }
+        }
+      };
+
+      checkUserRole();
+    }
+  }, [user, authLoading, router, supabase]);
 
   // Filter properties based on search
   const filteredProperties = mockProperties.filter(property =>
@@ -122,32 +160,105 @@ export default function PreLoginSelector() {
     setStep('login');
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+
     if (!selectedProperty || !selectedUnit || !loginEmail || !loginPassword) {
+      setError('Please fill in all required fields');
       return;
     }
     
     setIsLoading(true);
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false);
-      // Store property and unit info in localStorage or context
-      localStorage.setItem('selectedProperty', selectedProperty);
-      localStorage.setItem('selectedUnit', selectedUnit);
+
+    try {
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data.user) {
+        throw new Error('Login failed. Please try again.');
+      }
+
+      // Check if user is a tenant (not admin)
+      const { data: adminData } = await supabase
+        .from('admin')
+        .select('id')
+        .eq('id', data.user.id)
+        .single();
+
+      if (adminData) {
+        setError('This login is for tenants only. Admins should use the admin portal.');
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // Verify tenant exists and matches selected unit/property
+      const { data: tenantData } = await supabase
+        .from('tenants')
+        .select('*')
+        .eq('id', data.user.id)
+        .single();
+
+      if (!tenantData) {
+        setError('Tenant account not found. Please contact your property manager.');
+        await supabase.auth.signOut();
+        return;
+      }
+
+      // Optional: Verify tenant is in the correct property/unit
+      // You can add this check if you want strict property-unit validation
+      // if (tenantData.property_id !== selectedProperty || tenantData.unit_number !== selectedUnit) {
+      //   setError('Your account is not associated with this property/unit.');
+      //   await supabase.auth.signOut();
+      //   return;
+      // }
+
+      // Store property and unit info in sessionStorage (temporary)
+      sessionStorage.setItem('selectedProperty', selectedProperty);
+      sessionStorage.setItem('selectedUnit', selectedUnit);
+
+      // Show success message
+    toast.success("Login successful!", {
+  description: "Redirecting to your tenant portal...",
+})
+
+
       // Redirect to tenant dashboard
       router.push('/users/uhome');
-    }, 1500);
+      router.refresh();
+
+    } catch (error: any) {
+      console.error('Login error:', error);
+      setError(error.message || 'An error occurred during login');
+      
+      toast.error("Login failed", {
+  description:
+    error.message || "Please check your credentials and try again.",
+})
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignupRedirect = () => {
     if (!selectedProperty || !selectedUnit) {
+      setError('Please select a property and unit first');
       return;
     }
+    
     // Store property and unit info for signup
-    localStorage.setItem('selectedProperty', selectedProperty);
-    localStorage.setItem('selectedUnit', selectedUnit);
-    router.push('/auth/signup');
+    sessionStorage.setItem('selectedProperty', selectedProperty);
+    sessionStorage.setItem('selectedUnit', selectedUnit);
+    
+    // Redirect to signup page with query params
+    router.push(`/auth/signup?property=${selectedProperty}&unit=${selectedUnit}`);
   };
 
   const getPropertyTypeIcon = (type: string) => {
@@ -159,6 +270,54 @@ export default function PreLoginSelector() {
       default: return '🏠';
     }
   };
+
+  const handleForgotPassword = async () => {
+    if (!loginEmail) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(loginEmail, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) throw error;
+
+    toast.success("Reset email sent", {
+  description: "Check your email for password reset instructions.",
+})
+    } catch (error: any) {
+      setError(error.message || 'Failed to send reset email');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+        <div className="text-center">
+          <div className="inline-flex items-center gap-2 mb-4">
+            <div className="h-12 w-12 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+              <Building className="h-7 w-7 text-white" />
+            </div>
+            <div className="text-left">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Tenant Portal
+              </h1>
+            </div>
+          </div>
+          <div className="h-12 w-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -209,6 +368,13 @@ export default function PreLoginSelector() {
 
         <Card className="border-0 shadow-2xl">
           <CardContent className="p-6">
+            {/* Show error message if any */}
+            {error && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
             {/* Step 1: Property Selection */}
             {step === 'property' && (
               <div className="space-y-6">
@@ -448,6 +614,7 @@ export default function PreLoginSelector() {
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -460,6 +627,7 @@ export default function PreLoginSelector() {
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
+                        disabled={isLoading}
                       />
                       <Button
                         type="button"
@@ -467,6 +635,7 @@ export default function PreLoginSelector() {
                         size="sm"
                         className="absolute right-2 top-1/2 transform -translate-y-1/2"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={isLoading}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
@@ -479,12 +648,19 @@ export default function PreLoginSelector() {
                         type="checkbox"
                         id="remember"
                         className="rounded border-gray-300"
+                        disabled={isLoading}
                       />
                       <Label htmlFor="remember" className="text-sm">
                         Remember me
                       </Label>
                     </div>
-                    <Button variant="link" size="sm" className="px-0">
+                    <Button 
+                      variant="link" 
+                      size="sm" 
+                      className="px-0"
+                      onClick={handleForgotPassword}
+                      disabled={isLoading || !loginEmail}
+                    >
                       Forgot password?
                     </Button>
                   </div>
@@ -517,7 +693,7 @@ export default function PreLoginSelector() {
                     variant="outline"
                     className="w-full"
                     onClick={handleSignupRedirect}
-                    disabled={!selectedProperty || !selectedUnit}
+                    disabled={isLoading || !selectedProperty || !selectedUnit}
                   >
                     <UserPlus className="h-4 w-4 mr-2" />
                     Create New Account
@@ -525,10 +701,14 @@ export default function PreLoginSelector() {
                 </div>
 
                 <div className="flex justify-between pt-4">
-                  <Button variant="ghost" onClick={() => setStep('unit')}>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setStep('unit')}
+                    disabled={isLoading}
+                  >
                     ← Back to Unit Selection
                   </Button>
-                  <Button variant="ghost" asChild>
+                  <Button variant="ghost" asChild disabled={isLoading}>
                     <Link href="/">
                       Back to Home
                     </Link>
@@ -554,16 +734,24 @@ export default function PreLoginSelector() {
                   <p className="text-muted-foreground mb-4">
                     You'll be taken to the full signup form
                   </p>
-                  <Button onClick={handleSignupRedirect}>
+                  <Button onClick={handleSignupRedirect} disabled={isLoading}>
                     Continue to Signup
                   </Button>
                 </div>
 
                 <div className="flex justify-between pt-4">
-                  <Button variant="ghost" onClick={() => setStep('login')}>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setStep('login')}
+                    disabled={isLoading}
+                  >
                     ← Back to Login
                   </Button>
-                  <Button variant="ghost" onClick={() => setStep('unit')}>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setStep('unit')}
+                    disabled={isLoading}
+                  >
                     ← Change Unit
                   </Button>
                 </div>
@@ -576,7 +764,7 @@ export default function PreLoginSelector() {
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">
             Need help finding your property?{' '}
-            <Button variant="link" className="p-0 h-auto" asChild>
+            <Button variant="link" className="p-0 h-auto" asChild disabled={isLoading}>
               <Link href="/support">
                 Contact Support
               </Link>

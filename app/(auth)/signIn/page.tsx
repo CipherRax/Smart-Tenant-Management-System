@@ -1,10 +1,12 @@
-import LandlordRegistration from '@/components/SignUpadmin';
+// import LandlordRegistration from '@/components/SignUpadmin';
+import AdminLoginPage from '@/components/SignUpadmin';
 
 
 const SingUpPage = () => {
     return (
         <>
-        <LandlordRegistration />
+        {/* <LandlordRegistration /> */}
+        <AdminLoginPage />
         </>
       
     );

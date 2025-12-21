@@ -45,6 +45,9 @@ import {
   MapPin,
   Briefcase
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from "sonner"
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Form validation schema
 const registrationSchema = z.object({
@@ -84,14 +87,20 @@ type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
 export default function LandlordRegistration() {
   const router = useRouter();
+  // const { toast } = useToast();
+  const supabase = createClient();
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedUserType, setSelectedUserType] = useState<'landlord' | 'property_manager' | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   const form = useForm<RegistrationFormValues>({
     resolver: zodResolver(registrationSchema),
+    mode: 'onBlur',
     defaultValues: {
       userType: 'landlord',
       firstName: '',
@@ -105,7 +114,7 @@ export default function LandlordRegistration() {
       propertiesCount: '1',
       acceptTerms: false,
       marketingEmails: false,
-    },
+    } as RegistrationFormValues,
   });
 
   const userType = form.watch('userType');
@@ -150,19 +159,118 @@ export default function LandlordRegistration() {
 
   const onSubmit = async (data: RegistrationFormValues) => {
     setIsSubmitting(true);
+    setError(null);
+    setSuccess(null);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    console.log('Registration data:', data);
-    
-    // Store registration data
-    localStorage.setItem('registeredUser', JSON.stringify(data));
-    
-    // Redirect to verification or dashboard
-    router.push('/auth/verify');
-    
-    setIsSubmitting(false);
+    try {
+      // Step 1: Create authentication user in Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            phone: data.phone,
+            user_type: data.userType,
+            company_name: data.companyName || null,
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (authError) {
+        throw new Error(`Authentication error: ${authError.message}`);
+      }
+
+      if (!authData.user) {
+        throw new Error('User creation failed. Please try again.');
+      }
+
+      // Step 2: Create admin profile in the database
+      const adminData = {
+        id: authData.user.id,
+        full_name: `${data.firstName} ${data.lastName}`,
+        email: data.email,
+        phone_number: data.phone,
+        role: data.userType === 'property_manager' ? 'manager' : 'landlord',
+        is_active: true,
+        permissions: {
+          can_create_users: true,
+          can_delete_users: true,
+          can_manage_properties: true,
+          can_view_reports: true,
+          can_manage_finances: true,
+        },
+      };
+
+      const { error: dbError } = await supabase
+        .from('admin')
+        .insert([adminData] as any);
+
+      if (dbError) {
+        // If database insert fails, try to delete the auth user
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        throw new Error(`Database error: ${dbError.message}`);
+      }
+
+      // Step 3: Show success message
+      setSuccess('Account created successfully!');
+      
+     toast.success("Registration successful!", {
+  description: "Please check your email to verify your account.",
+  duration: 5000,
+})
+
+      // Step 4: Store registration data in localStorage for the verification page
+      const registrationData = {
+        ...data,
+        userId: authData.user.id,
+      };
+      localStorage.setItem('adminRegistrationData', JSON.stringify(registrationData));
+
+      // Step 5: Redirect to verification page
+      setTimeout(() => {
+        router.push('/auth/verify');
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      setError(error.message || 'An error occurred during registration');
+      
+     toast.error("Registration failed", {
+  description:
+    error.message || "Please try again or contact support.",
+  duration: 5000,
+})
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Helper function to check if email already exists
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    try {
+      // Check in admin table
+      const { data: adminData } = await supabase
+        .from('admin')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      if (adminData) return true;
+
+      // Check in tenants table
+      const { data: tenantData } = await supabase
+        .from('tenants')
+        .select('id')
+        .eq('email', email)
+        .single();
+
+      return !!tenantData;
+    } catch (error) {
+      return false;
+    }
   };
 
   const getStepContent = () => {
@@ -294,7 +402,12 @@ export default function LandlordRegistration() {
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="John" className="pl-10" {...field} />
+                        <Input 
+                          placeholder="John" 
+                          className="pl-10" 
+                          {...field} 
+                          disabled={isSubmitting}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -311,7 +424,12 @@ export default function LandlordRegistration() {
                     <FormControl>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="Doe" className="pl-10" {...field} />
+                        <Input 
+                          placeholder="Doe" 
+                          className="pl-10" 
+                          {...field} 
+                          disabled={isSubmitting}
+                        />
                       </div>
                     </FormControl>
                     <FormMessage />
@@ -334,6 +452,18 @@ export default function LandlordRegistration() {
                         placeholder="john.doe@example.com" 
                         className="pl-10"
                         {...field} 
+                        disabled={isSubmitting}
+                        onBlur={async (e) => {
+                          if (e.target.value) {
+                            const exists = await checkEmailExists(e.target.value);
+                            if (exists) {
+                              form.setError('email', {
+                                type: 'manual',
+                                message: 'This email is already registered',
+                              });
+                            }
+                          }
+                        }}
                       />
                     </div>
                   </FormControl>
@@ -358,6 +488,7 @@ export default function LandlordRegistration() {
                         placeholder="+1 (555) 123-4567" 
                         className="pl-10"
                         {...field} 
+                        disabled={isSubmitting}
                       />
                     </div>
                   </FormControl>
@@ -396,6 +527,7 @@ export default function LandlordRegistration() {
                             placeholder="Your Property Management Company" 
                             className="pl-10"
                             {...field} 
+                            disabled={isSubmitting}
                           />
                         </div>
                       </FormControl>
@@ -417,6 +549,7 @@ export default function LandlordRegistration() {
                             placeholder="https://yourcompany.com" 
                             className="pl-10"
                             {...field} 
+                            disabled={isSubmitting}
                           />
                         </div>
                       </FormControl>
@@ -435,7 +568,11 @@ export default function LandlordRegistration() {
                   <FormLabel>
                     How many properties do you {userType === 'landlord' ? 'own' : 'currently manage'}?
                   </FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                    disabled={isSubmitting}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select number of properties" />
@@ -498,6 +635,7 @@ export default function LandlordRegistration() {
                         placeholder="Create a strong password"
                         className="pl-10 pr-10"
                         {...field} 
+                        disabled={isSubmitting}
                       />
                       <Button
                         type="button"
@@ -505,6 +643,7 @@ export default function LandlordRegistration() {
                         size="sm"
                         className="absolute right-2 top-1/2 transform -translate-y-1/2"
                         onClick={() => setShowPassword(!showPassword)}
+                        disabled={isSubmitting}
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
@@ -532,6 +671,7 @@ export default function LandlordRegistration() {
                         placeholder="Confirm your password"
                         className="pl-10 pr-10"
                         {...field} 
+                        disabled={isSubmitting}
                       />
                       <Button
                         type="button"
@@ -539,6 +679,7 @@ export default function LandlordRegistration() {
                         size="sm"
                         className="absolute right-2 top-1/2 transform -translate-y-1/2"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        disabled={isSubmitting}
                       >
                         {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
@@ -560,6 +701,7 @@ export default function LandlordRegistration() {
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          disabled={isSubmitting}
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
@@ -590,6 +732,7 @@ export default function LandlordRegistration() {
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          disabled={isSubmitting}
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
@@ -646,6 +789,19 @@ export default function LandlordRegistration() {
           </div>
         </div>
 
+        {/* Error/Success Messages */}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        {success && (
+          <Alert className="mb-6 bg-green-50 border-green-200">
+            <AlertDescription className="text-green-800">{success}</AlertDescription>
+          </Alert>
+        )}
+
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-8">
           <div className="flex items-center">
@@ -699,7 +855,7 @@ export default function LandlordRegistration() {
                     type="button"
                     variant="ghost"
                     onClick={handlePreviousStep}
-                    disabled={currentStep === 1}
+                    disabled={currentStep === 1 || isSubmitting}
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Previous
@@ -709,7 +865,7 @@ export default function LandlordRegistration() {
                     <Button
                       type="button"
                       onClick={handleNextStep}
-                      disabled={!selectedUserType && currentStep === 1}
+                      disabled={(!selectedUserType && currentStep === 1) || isSubmitting}
                     >
                       Next: {steps[currentStep].title}
                       <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />

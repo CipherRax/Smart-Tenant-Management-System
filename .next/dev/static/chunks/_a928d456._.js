@@ -1019,10 +1019,101 @@ const registrationSchema = __TURBOPACK__imported__module__$5b$project$5d2f$node_
         "confirmPassword"
     ]
 });
+// Registration helper function
+async function registerAdminUser(userData) {
+    const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createClient"])();
+    try {
+        console.log('Starting registration for:', userData.email);
+        // 1. Create auth user
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: userData.email,
+            password: userData.password,
+            options: {
+                data: {
+                    first_name: userData.firstName,
+                    last_name: userData.lastName,
+                    phone: userData.phone,
+                    user_type: userData.userType
+                },
+                emailRedirectTo: `${window.location.origin}/auth/callback`
+            }
+        });
+        if (authError) {
+            console.error('Auth error:', authError);
+            throw new Error(`Registration failed: ${authError.message}`);
+        }
+        if (!authData.user) {
+            throw new Error('User creation failed. Please try again.');
+        }
+        console.log('Auth user created:', authData.user.id);
+        // 2. Create admin profile
+        const adminData = {
+            id: authData.user.id,
+            full_name: `${userData.firstName} ${userData.lastName}`,
+            email: userData.email,
+            phone_number: userData.phone,
+            role: userData.userType === 'property_manager' ? 'manager' : 'landlord',
+            is_active: true,
+            permissions: {
+                can_create_users: true,
+                can_delete_users: true,
+                can_manage_properties: true,
+                can_view_reports: true,
+                can_manage_finances: true
+            }
+        };
+        console.log('Inserting admin data:', adminData);
+        // Try to insert with retry logic
+        let retryCount = 0;
+        const maxRetries = 3;
+        let dbError = null;
+        while(retryCount < maxRetries){
+            const { error } = await supabase.from('admin').insert(adminData);
+            if (!error) {
+                console.log('Admin profile created successfully');
+                break;
+            }
+            dbError = error;
+            console.log(`Insert attempt ${retryCount + 1} failed:`, error.message);
+            // Wait before retry (exponential backoff)
+            await new Promise((resolve)=>setTimeout(resolve, 1000 * (retryCount + 1)));
+            retryCount++;
+        }
+        if (dbError) {
+            console.error('All insert attempts failed:', dbError);
+            // If database insert fails, try to sign in and then insert
+            console.log('Trying alternative approach...');
+            // Sign in to create a session
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email: userData.email,
+                password: userData.password
+            });
+            if (signInError) {
+                throw new Error(`Could not create profile: ${dbError.message}`);
+            }
+            // Try insert again with active session
+            const { error: finalError } = await supabase.from('admin').insert(adminData);
+            if (finalError) {
+                throw new Error(`Could not create profile: ${finalError.message}`);
+            }
+        }
+        return {
+            success: true,
+            userId: authData.user.id,
+            email: authData.user.email,
+            needsEmailVerification: !authData.session
+        };
+    } catch (error) {
+        console.error('Registration error:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
 function LandlordRegistration() {
     _s();
     const router = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$navigation$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRouter"])();
-    // const { toast } = useToast();
     const supabase = (0, __TURBOPACK__imported__module__$5b$project$5d2f$lib$2f$supabase$2f$client$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["createClient"])();
     const [showPassword, setShowPassword] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [showConfirmPassword, setShowConfirmPassword] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
@@ -1115,72 +1206,45 @@ function LandlordRegistration() {
         setError(null);
         setSuccess(null);
         try {
-            // Step 1: Create authentication user in Supabase Auth
-            const { data: authData, error: authError } = await supabase.auth.signUp({
+            const result = await registerAdminUser({
                 email: data.email,
                 password: data.password,
-                options: {
-                    data: {
-                        first_name: data.firstName,
-                        last_name: data.lastName,
-                        phone: data.phone,
-                        user_type: data.userType,
-                        company_name: data.companyName || null
-                    },
-                    emailRedirectTo: `${window.location.origin}/auth/callback`
-                }
+                firstName: data.firstName,
+                lastName: data.lastName,
+                phone: data.phone,
+                userType: data.userType,
+                companyName: data.companyName
             });
-            if (authError) {
-                throw new Error(`Authentication error: ${authError.message}`);
+            if (!result.success) {
+                throw new Error(result.error);
             }
-            if (!authData.user) {
-                throw new Error('User creation failed. Please try again.');
-            }
-            // Step 2: Create admin profile in the database
-            const adminData = {
-                id: authData.user.id,
-                full_name: `${data.firstName} ${data.lastName}`,
-                email: data.email,
-                phone_number: data.phone,
-                role: data.userType === 'property_manager' ? 'manager' : 'landlord',
-                is_active: true,
-                permissions: {
-                    can_create_users: true,
-                    can_delete_users: true,
-                    can_manage_properties: true,
-                    can_view_reports: true,
-                    can_manage_finances: true
-                }
-            };
-            const { error: dbError } = await supabase.from('admin').insert([
-                adminData
-            ]);
-            if (dbError) {
-                // If database insert fails, try to delete the auth user
-                await supabase.auth.admin.deleteUser(authData.user.id);
-                throw new Error(`Database error: ${dbError.message}`);
-            }
-            // Step 3: Show success message
-            setSuccess('Account created successfully!');
-            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success("Registration successful!", {
-                description: "Please check your email to verify your account.",
+            // Show success toast
+            __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].success(result.needsEmailVerification ? "Registration successful! Please check your email to verify your account." : "Registration successful! Redirecting to dashboard...", {
                 duration: 5000
             });
-            // Step 4: Store registration data in localStorage for the verification page
-            const registrationData = {
-                ...data,
-                userId: authData.user.id
-            };
-            localStorage.setItem('adminRegistrationData', JSON.stringify(registrationData));
-            // Step 5: Redirect to verification page
-            setTimeout(()=>{
-                router.push('/auth/verify');
-            }, 2000);
+            // Redirect based on email verification status
+            if (result.needsEmailVerification) {
+                localStorage.setItem('pendingVerificationEmail', data.email);
+                setTimeout(()=>router.push('/auth/verify'), 2000);
+            } else {
+                setTimeout(()=>router.push('/dashboard'), 2000);
+            }
         } catch (error) {
             console.error('Registration error:', error);
-            setError(error.message || 'An error occurred during registration');
+            // User-friendly error messages
+            let userMessage = error.message;
+            if (error.message.includes('User already registered')) {
+                userMessage = 'This email is already registered. Please try logging in instead.';
+            } else if (error.message.includes('password')) {
+                userMessage = 'Password does not meet requirements. Please try a different password.';
+            } else if (error.message.includes('network') || error.message.includes('fetch')) {
+                userMessage = 'Network error. Please check your internet connection and try again.';
+            } else if (error.message.includes('permission')) {
+                userMessage = 'Registration is currently restricted. Please contact support.';
+            }
+            setError(userMessage);
             __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$sonner$2f$dist$2f$index$2e$mjs__$5b$app$2d$client$5d$__$28$ecmascript$29$__["toast"].error("Registration failed", {
-                description: error.message || "Please try again or contact support.",
+                description: userMessage,
                 duration: 5000
             });
         } finally{
@@ -1214,7 +1278,7 @@ function LandlordRegistration() {
                                     children: "Select Your Role"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 282,
+                                    lineNumber: 380,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1222,13 +1286,13 @@ function LandlordRegistration() {
                                     children: "Choose the option that best describes you"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 283,
+                                    lineNumber: 381,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 281,
+                            lineNumber: 379,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1248,12 +1312,12 @@ function LandlordRegistration() {
                                                         className: `h-8 w-8 ${selectedUserType === 'landlord' ? 'text-primary' : 'text-gray-400'}`
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 301,
+                                                        lineNumber: 399,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 298,
+                                                    lineNumber: 396,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1263,7 +1327,7 @@ function LandlordRegistration() {
                                                             children: "Landlord / Property Owner"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 306,
+                                                            lineNumber: 404,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1271,13 +1335,13 @@ function LandlordRegistration() {
                                                             children: "I own one or more rental properties"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 307,
+                                                            lineNumber: 405,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 305,
+                                                    lineNumber: 403,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1290,20 +1354,20 @@ function LandlordRegistration() {
                                                                     className: "h-4 w-4 text-green-500"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 313,
+                                                                    lineNumber: 411,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: "Manage your own properties"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 314,
+                                                                    lineNumber: 412,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 312,
+                                                            lineNumber: 410,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1313,20 +1377,20 @@ function LandlordRegistration() {
                                                                     className: "h-4 w-4 text-green-500"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 317,
+                                                                    lineNumber: 415,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: "Collect rent online"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 318,
+                                                                    lineNumber: 416,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 316,
+                                                            lineNumber: 414,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1336,42 +1400,42 @@ function LandlordRegistration() {
                                                                     className: "h-4 w-4 text-green-500"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 321,
+                                                                    lineNumber: 419,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: "Handle maintenance requests"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 322,
+                                                                    lineNumber: 420,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 320,
+                                                            lineNumber: 418,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 311,
+                                                    lineNumber: 409,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 297,
+                                            lineNumber: 395,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 296,
+                                        lineNumber: 394,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 290,
+                                    lineNumber: 388,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -1388,12 +1452,12 @@ function LandlordRegistration() {
                                                         className: `h-8 w-8 ${selectedUserType === 'property_manager' ? 'text-primary' : 'text-gray-400'}`
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 341,
+                                                        lineNumber: 439,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 338,
+                                                    lineNumber: 436,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1403,7 +1467,7 @@ function LandlordRegistration() {
                                                             children: "Property Manager"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 346,
+                                                            lineNumber: 444,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1411,13 +1475,13 @@ function LandlordRegistration() {
                                                             children: "I manage properties for multiple owners"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 347,
+                                                            lineNumber: 445,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 345,
+                                                    lineNumber: 443,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1430,20 +1494,20 @@ function LandlordRegistration() {
                                                                     className: "h-4 w-4 text-green-500"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 353,
+                                                                    lineNumber: 451,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: "Manage multiple properties"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 354,
+                                                                    lineNumber: 452,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 352,
+                                                            lineNumber: 450,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1453,20 +1517,20 @@ function LandlordRegistration() {
                                                                     className: "h-4 w-4 text-green-500"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 357,
+                                                                    lineNumber: 455,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: "Multi-owner support"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 358,
+                                                                    lineNumber: 456,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 356,
+                                                            lineNumber: 454,
                                                             columnNumber: 23
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1476,48 +1540,48 @@ function LandlordRegistration() {
                                                                     className: "h-4 w-4 text-green-500"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 361,
+                                                                    lineNumber: 459,
                                                                     columnNumber: 25
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                                                     children: "Advanced reporting"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                                    lineNumber: 362,
+                                                                    lineNumber: 460,
                                                                     columnNumber: 25
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 360,
+                                                            lineNumber: 458,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 351,
+                                                    lineNumber: 449,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 337,
+                                            lineNumber: 435,
                                             columnNumber: 19
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 336,
+                                        lineNumber: 434,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 330,
+                                    lineNumber: 428,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 288,
+                            lineNumber: 386,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormField"], {
@@ -1532,34 +1596,34 @@ function LandlordRegistration() {
                                                 ...field
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 376,
+                                                lineNumber: 474,
                                                 columnNumber: 21
                                             }, void 0)
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 375,
+                                            lineNumber: 473,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 378,
+                                            lineNumber: 476,
                                             columnNumber: 19
                                         }, void 0)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 374,
+                                    lineNumber: 472,
                                     columnNumber: 17
                                 }, void 0)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 370,
+                            lineNumber: 468,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 280,
+                    lineNumber: 378,
                     columnNumber: 11
                 }, this);
             case 2:
@@ -1574,7 +1638,7 @@ function LandlordRegistration() {
                                     children: "Personal Information"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 389,
+                                    lineNumber: 487,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1582,13 +1646,13 @@ function LandlordRegistration() {
                                     children: "Enter your personal details"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 390,
+                                    lineNumber: 488,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 388,
+                            lineNumber: 486,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1603,7 +1667,7 @@ function LandlordRegistration() {
                                                     children: "First Name"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 401,
+                                                    lineNumber: 499,
                                                     columnNumber: 21
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -1614,7 +1678,7 @@ function LandlordRegistration() {
                                                                 className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 404,
+                                                                lineNumber: 502,
                                                                 columnNumber: 25
                                                             }, void 0),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1624,34 +1688,34 @@ function LandlordRegistration() {
                                                                 disabled: isSubmitting
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 405,
+                                                                lineNumber: 503,
                                                                 columnNumber: 25
                                                             }, void 0)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 403,
+                                                        lineNumber: 501,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 402,
+                                                    lineNumber: 500,
                                                     columnNumber: 21
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 413,
+                                                    lineNumber: 511,
                                                     columnNumber: 21
                                                 }, void 0)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 400,
+                                            lineNumber: 498,
                                             columnNumber: 19
                                         }, void 0)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 396,
+                                    lineNumber: 494,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormField"], {
@@ -1663,7 +1727,7 @@ function LandlordRegistration() {
                                                     children: "Last Name"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 423,
+                                                    lineNumber: 521,
                                                     columnNumber: 21
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -1674,7 +1738,7 @@ function LandlordRegistration() {
                                                                 className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 426,
+                                                                lineNumber: 524,
                                                                 columnNumber: 25
                                                             }, void 0),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1684,40 +1748,40 @@ function LandlordRegistration() {
                                                                 disabled: isSubmitting
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 427,
+                                                                lineNumber: 525,
                                                                 columnNumber: 25
                                                             }, void 0)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 425,
+                                                        lineNumber: 523,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 424,
+                                                    lineNumber: 522,
                                                     columnNumber: 21
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 435,
+                                                    lineNumber: 533,
                                                     columnNumber: 21
                                                 }, void 0)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 422,
+                                            lineNumber: 520,
                                             columnNumber: 19
                                         }, void 0)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 418,
+                                    lineNumber: 516,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 395,
+                            lineNumber: 493,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormField"], {
@@ -1729,7 +1793,7 @@ function LandlordRegistration() {
                                             children: "Email Address"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 446,
+                                            lineNumber: 544,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -1740,7 +1804,7 @@ function LandlordRegistration() {
                                                         className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 449,
+                                                        lineNumber: 547,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1750,53 +1814,55 @@ function LandlordRegistration() {
                                                         ...field,
                                                         disabled: isSubmitting,
                                                         onBlur: async (e)=>{
-                                                            if (e.target.value) {
+                                                            if (e.target.value && !isSubmitting) {
                                                                 const exists = await checkEmailExists(e.target.value);
                                                                 if (exists) {
                                                                     form.setError('email', {
                                                                         type: 'manual',
                                                                         message: 'This email is already registered'
                                                                     });
+                                                                } else {
+                                                                    form.clearErrors('email');
                                                                 }
                                                             }
                                                         }
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 450,
+                                                        lineNumber: 548,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 448,
+                                                lineNumber: 546,
                                                 columnNumber: 21
                                             }, void 0)
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 447,
+                                            lineNumber: 545,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormDescription"], {
                                             children: "We'll send verification and important updates to this email"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 470,
+                                            lineNumber: 570,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 473,
+                                            lineNumber: 573,
                                             columnNumber: 19
                                         }, void 0)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 445,
+                                    lineNumber: 543,
                                     columnNumber: 17
                                 }, void 0)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 441,
+                            lineNumber: 539,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormField"], {
@@ -1808,7 +1874,7 @@ function LandlordRegistration() {
                                             children: "Phone Number"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 483,
+                                            lineNumber: 583,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -1819,7 +1885,7 @@ function LandlordRegistration() {
                                                         className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 486,
+                                                        lineNumber: 586,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1829,47 +1895,47 @@ function LandlordRegistration() {
                                                         disabled: isSubmitting
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 487,
+                                                        lineNumber: 587,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 485,
+                                                lineNumber: 585,
                                                 columnNumber: 21
                                             }, void 0)
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 484,
+                                            lineNumber: 584,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormDescription"], {
                                             children: "Used for urgent notifications and account recovery"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 495,
+                                            lineNumber: 595,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 498,
+                                            lineNumber: 598,
                                             columnNumber: 19
                                         }, void 0)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 482,
+                                    lineNumber: 582,
                                     columnNumber: 17
                                 }, void 0)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 478,
+                            lineNumber: 578,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 387,
+                    lineNumber: 485,
                     columnNumber: 11
                 }, this);
             case 3:
@@ -1884,7 +1950,7 @@ function LandlordRegistration() {
                                     children: "Business Information"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 509,
+                                    lineNumber: 609,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1895,13 +1961,13 @@ function LandlordRegistration() {
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 510,
+                                    lineNumber: 610,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 508,
+                            lineNumber: 608,
                             columnNumber: 13
                         }, this),
                         userType === 'property_manager' && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -1915,7 +1981,7 @@ function LandlordRegistration() {
                                                     children: "Company Name (Optional)"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 522,
+                                                    lineNumber: 622,
                                                     columnNumber: 23
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -1926,7 +1992,7 @@ function LandlordRegistration() {
                                                                 className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 525,
+                                                                lineNumber: 625,
                                                                 columnNumber: 27
                                                             }, void 0),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1936,34 +2002,34 @@ function LandlordRegistration() {
                                                                 disabled: isSubmitting
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 526,
+                                                                lineNumber: 626,
                                                                 columnNumber: 27
                                                             }, void 0)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 524,
+                                                        lineNumber: 624,
                                                         columnNumber: 25
                                                     }, void 0)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 523,
+                                                    lineNumber: 623,
                                                     columnNumber: 23
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 534,
+                                                    lineNumber: 634,
                                                     columnNumber: 23
                                                 }, void 0)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 521,
+                                            lineNumber: 621,
                                             columnNumber: 21
                                         }, void 0)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 517,
+                                    lineNumber: 617,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormField"], {
@@ -1975,7 +2041,7 @@ function LandlordRegistration() {
                                                     children: "Company Website (Optional)"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 544,
+                                                    lineNumber: 644,
                                                     columnNumber: 23
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -1986,7 +2052,7 @@ function LandlordRegistration() {
                                                                 className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 547,
+                                                                lineNumber: 647,
                                                                 columnNumber: 27
                                                             }, void 0),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -1996,34 +2062,34 @@ function LandlordRegistration() {
                                                                 disabled: isSubmitting
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 548,
+                                                                lineNumber: 648,
                                                                 columnNumber: 27
                                                             }, void 0)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 546,
+                                                        lineNumber: 646,
                                                         columnNumber: 25
                                                     }, void 0)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 545,
+                                                    lineNumber: 645,
                                                     columnNumber: 23
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 556,
+                                                    lineNumber: 656,
                                                     columnNumber: 23
                                                 }, void 0)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 543,
+                                            lineNumber: 643,
                                             columnNumber: 21
                                         }, void 0)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 539,
+                                    lineNumber: 639,
                                     columnNumber: 17
                                 }, this)
                             ]
@@ -2041,7 +2107,7 @@ function LandlordRegistration() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 568,
+                                            lineNumber: 668,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Select"], {
@@ -2055,17 +2121,17 @@ function LandlordRegistration() {
                                                             placeholder: "Select number of properties"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 578,
+                                                            lineNumber: 678,
                                                             columnNumber: 25
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 577,
+                                                        lineNumber: 677,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 576,
+                                                    lineNumber: 676,
                                                     columnNumber: 21
                                                 }, void 0),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectContent"], {
@@ -2075,7 +2141,7 @@ function LandlordRegistration() {
                                                             children: "1 property"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 582,
+                                                            lineNumber: 682,
                                                             columnNumber: 23
                                                         }, void 0),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2083,7 +2149,7 @@ function LandlordRegistration() {
                                                             children: "2-5 properties"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 583,
+                                                            lineNumber: 683,
                                                             columnNumber: 23
                                                         }, void 0),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2091,7 +2157,7 @@ function LandlordRegistration() {
                                                             children: "6-10 properties"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 584,
+                                                            lineNumber: 684,
                                                             columnNumber: 23
                                                         }, void 0),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2099,7 +2165,7 @@ function LandlordRegistration() {
                                                             children: "11-20 properties"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 585,
+                                                            lineNumber: 685,
                                                             columnNumber: 23
                                                         }, void 0),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$select$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["SelectItem"], {
@@ -2107,42 +2173,42 @@ function LandlordRegistration() {
                                                             children: "21+ properties"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 586,
+                                                            lineNumber: 686,
                                                             columnNumber: 23
                                                         }, void 0)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 581,
+                                                    lineNumber: 681,
                                                     columnNumber: 21
                                                 }, void 0)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 571,
+                                            lineNumber: 671,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormDescription"], {
                                             children: "This helps us customize your experience"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 589,
+                                            lineNumber: 689,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 592,
+                                            lineNumber: 692,
                                             columnNumber: 19
                                         }, void 0)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 567,
+                                    lineNumber: 667,
                                     columnNumber: 17
                                 }, void 0)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 563,
+                            lineNumber: 663,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2154,7 +2220,7 @@ function LandlordRegistration() {
                                         className: "h-5 w-5 text-blue-600 flex-shrink-0"
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 599,
+                                        lineNumber: 699,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2164,7 +2230,7 @@ function LandlordRegistration() {
                                                 children: "Professional Features"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 601,
+                                                lineNumber: 701,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -2174,57 +2240,57 @@ function LandlordRegistration() {
                                                         children: "Add properties after registration"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 603,
+                                                        lineNumber: 703,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                         children: "Invite team members to your account"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 604,
+                                                        lineNumber: 704,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                         children: "Access advanced reporting tools"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 605,
+                                                        lineNumber: 705,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                         children: "24/7 priority support"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 606,
+                                                        lineNumber: 706,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 602,
+                                                lineNumber: 702,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 600,
+                                        lineNumber: 700,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 598,
+                                lineNumber: 698,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 597,
+                            lineNumber: 697,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 507,
+                    lineNumber: 607,
                     columnNumber: 11
                 }, this);
             case 4:
@@ -2239,7 +2305,7 @@ function LandlordRegistration() {
                                     children: "Account Security"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 618,
+                                    lineNumber: 718,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2247,13 +2313,13 @@ function LandlordRegistration() {
                                     children: "Set a strong password to protect your account"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 619,
+                                    lineNumber: 719,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 617,
+                            lineNumber: 717,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormField"], {
@@ -2265,7 +2331,7 @@ function LandlordRegistration() {
                                             children: "Password"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 629,
+                                            lineNumber: 729,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -2276,7 +2342,7 @@ function LandlordRegistration() {
                                                         className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 632,
+                                                        lineNumber: 732,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2287,7 +2353,7 @@ function LandlordRegistration() {
                                                         disabled: isSubmitting
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 633,
+                                                        lineNumber: 733,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2301,52 +2367,52 @@ function LandlordRegistration() {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 648,
+                                                            lineNumber: 748,
                                                             columnNumber: 41
                                                         }, void 0) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 648,
+                                                            lineNumber: 748,
                                                             columnNumber: 74
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 640,
+                                                        lineNumber: 740,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 631,
+                                                lineNumber: 731,
                                                 columnNumber: 21
                                             }, void 0)
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 630,
+                                            lineNumber: 730,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormDescription"], {
                                             children: "Must contain 8+ characters with uppercase, number, and special character"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 652,
+                                            lineNumber: 752,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 655,
+                                            lineNumber: 755,
                                             columnNumber: 19
                                         }, void 0)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 628,
+                                    lineNumber: 728,
                                     columnNumber: 17
                                 }, void 0)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 624,
+                            lineNumber: 724,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormField"], {
@@ -2358,7 +2424,7 @@ function LandlordRegistration() {
                                             children: "Confirm Password"
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 665,
+                                            lineNumber: 765,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormControl"], {
@@ -2369,7 +2435,7 @@ function LandlordRegistration() {
                                                         className: "absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 668,
+                                                        lineNumber: 768,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$input$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Input"], {
@@ -2380,7 +2446,7 @@ function LandlordRegistration() {
                                                         disabled: isSubmitting
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 669,
+                                                        lineNumber: 769,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2394,45 +2460,45 @@ function LandlordRegistration() {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 684,
+                                                            lineNumber: 784,
                                                             columnNumber: 48
                                                         }, void 0) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$lucide$2d$react$2f$dist$2f$esm$2f$icons$2f$eye$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__$3c$export__default__as__Eye$3e$__["Eye"], {
                                                             className: "h-4 w-4"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 684,
+                                                            lineNumber: 784,
                                                             columnNumber: 81
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 676,
+                                                        lineNumber: 776,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 667,
+                                                lineNumber: 767,
                                                 columnNumber: 21
                                             }, void 0)
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 666,
+                                            lineNumber: 766,
                                             columnNumber: 19
                                         }, void 0),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 688,
+                                            lineNumber: 788,
                                             columnNumber: 19
                                         }, void 0)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 664,
+                                    lineNumber: 764,
                                     columnNumber: 17
                                 }, void 0)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 660,
+                            lineNumber: 760,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2453,12 +2519,12 @@ function LandlordRegistration() {
                                                             disabled: isSubmitting
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 701,
+                                                            lineNumber: 801,
                                                             columnNumber: 25
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 700,
+                                                        lineNumber: 800,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2474,7 +2540,7 @@ function LandlordRegistration() {
                                                                         children: "Terms of Service"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                                        lineNumber: 710,
+                                                                        lineNumber: 810,
                                                                         columnNumber: 27
                                                                     }, void 0),
                                                                     ' ',
@@ -2486,40 +2552,40 @@ function LandlordRegistration() {
                                                                         children: "Privacy Policy"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                                        lineNumber: 714,
+                                                                        lineNumber: 814,
                                                                         columnNumber: 27
                                                                     }, void 0)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 708,
+                                                                lineNumber: 808,
                                                                 columnNumber: 25
                                                             }, void 0),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormMessage"], {}, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 718,
+                                                                lineNumber: 818,
                                                                 columnNumber: 25
                                                             }, void 0)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 707,
+                                                        lineNumber: 807,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 699,
+                                                lineNumber: 799,
                                                 columnNumber: 21
                                             }, void 0)
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 695,
+                                        lineNumber: 795,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 694,
+                                    lineNumber: 794,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2537,12 +2603,12 @@ function LandlordRegistration() {
                                                             disabled: isSubmitting
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 732,
+                                                            lineNumber: 832,
                                                             columnNumber: 25
                                                         }, void 0)
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 731,
+                                                        lineNumber: 831,
                                                         columnNumber: 23
                                                     }, void 0),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2552,7 +2618,7 @@ function LandlordRegistration() {
                                                                 children: "Send me product updates, tips, and offers via email"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 739,
+                                                                lineNumber: 839,
                                                                 columnNumber: 25
                                                             }, void 0),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["FormDescription"], {
@@ -2560,35 +2626,35 @@ function LandlordRegistration() {
                                                                 children: "You can unsubscribe at any time"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 742,
+                                                                lineNumber: 842,
                                                                 columnNumber: 25
                                                             }, void 0)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 738,
+                                                        lineNumber: 838,
                                                         columnNumber: 23
                                                     }, void 0)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 730,
+                                                lineNumber: 830,
                                                 columnNumber: 21
                                             }, void 0)
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 726,
+                                        lineNumber: 826,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 725,
+                                    lineNumber: 825,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 693,
+                            lineNumber: 793,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2600,7 +2666,7 @@ function LandlordRegistration() {
                                         className: "h-5 w-5 text-yellow-600 flex-shrink-0"
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 754,
+                                        lineNumber: 854,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2610,7 +2676,7 @@ function LandlordRegistration() {
                                                 children: "Security Tips"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 756,
+                                                lineNumber: 856,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -2620,57 +2686,57 @@ function LandlordRegistration() {
                                                         children: "Use a unique password not used elsewhere"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 758,
+                                                        lineNumber: 858,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                         children: "Enable two-factor authentication after registration"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 759,
+                                                        lineNumber: 859,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                         children: "Never share your password with anyone"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 760,
+                                                        lineNumber: 860,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
                                                         children: "Log out from shared devices"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 761,
+                                                        lineNumber: 861,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 757,
+                                                lineNumber: 857,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 755,
+                                        lineNumber: 855,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 753,
+                                lineNumber: 853,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 752,
+                            lineNumber: 852,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 616,
+                    lineNumber: 716,
                     columnNumber: 11
                 }, this);
             default:
@@ -2693,12 +2759,12 @@ function LandlordRegistration() {
                                     className: "h-7 w-7 text-white"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 781,
+                                    lineNumber: 881,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 780,
+                                lineNumber: 880,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2709,7 +2775,7 @@ function LandlordRegistration() {
                                         children: "Register as Landlord/Manager"
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 784,
+                                        lineNumber: 884,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2717,24 +2783,24 @@ function LandlordRegistration() {
                                         children: "Create your professional account"
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 787,
+                                        lineNumber: 887,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 783,
+                                lineNumber: 883,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/components/SignUpadmin.tsx",
-                        lineNumber: 779,
+                        lineNumber: 879,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 778,
+                    lineNumber: 878,
                     columnNumber: 9
                 }, this),
                 error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Alert"], {
@@ -2744,12 +2810,12 @@ function LandlordRegistration() {
                         children: error
                     }, void 0, false, {
                         fileName: "[project]/components/SignUpadmin.tsx",
-                        lineNumber: 795,
+                        lineNumber: 895,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 794,
+                    lineNumber: 894,
                     columnNumber: 11
                 }, this),
                 success && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$alert$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Alert"], {
@@ -2759,12 +2825,12 @@ function LandlordRegistration() {
                         children: success
                     }, void 0, false, {
                         fileName: "[project]/components/SignUpadmin.tsx",
-                        lineNumber: 801,
+                        lineNumber: 901,
                         columnNumber: 13
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 800,
+                    lineNumber: 900,
                     columnNumber: 11
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2782,7 +2848,7 @@ function LandlordRegistration() {
                                                 children: stepItem.number
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 813,
+                                                lineNumber: 913,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -2790,36 +2856,36 @@ function LandlordRegistration() {
                                                 children: stepItem.title
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 818,
+                                                lineNumber: 918,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 810,
+                                        lineNumber: 910,
                                         columnNumber: 17
                                     }, this),
                                     index < steps.length - 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                         className: `h-1 w-16 ${stepItem.number < currentStep ? 'bg-primary' : 'bg-gray-300'}`
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 821,
+                                        lineNumber: 921,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, stepItem.number, true, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 809,
+                                lineNumber: 909,
                                 columnNumber: 15
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/components/SignUpadmin.tsx",
-                        lineNumber: 807,
+                        lineNumber: 907,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 806,
+                    lineNumber: 906,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$form$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Form"], {
@@ -2841,7 +2907,7 @@ function LandlordRegistration() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 834,
+                                            lineNumber: 934,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardDescription"], {
@@ -2854,13 +2920,13 @@ function LandlordRegistration() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 840,
+                                            lineNumber: 940,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 833,
+                                    lineNumber: 933,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardContent"], {
@@ -2868,7 +2934,7 @@ function LandlordRegistration() {
                                     children: getStepContent()
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 848,
+                                    lineNumber: 948,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["CardFooter"], {
@@ -2887,14 +2953,14 @@ function LandlordRegistration() {
                                                             className: "h-4 w-4 mr-2"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 860,
+                                                            lineNumber: 960,
                                                             columnNumber: 21
                                                         }, this),
                                                         "Previous"
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 854,
+                                                    lineNumber: 954,
                                                     columnNumber: 19
                                                 }, this),
                                                 currentStep < 4 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
@@ -2908,17 +2974,17 @@ function LandlordRegistration() {
                                                             className: "ml-2 h-4 w-4 rotate-180"
                                                         }, void 0, false, {
                                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                                            lineNumber: 871,
+                                                            lineNumber: 971,
                                                             columnNumber: 23
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 865,
+                                                    lineNumber: 965,
                                                     columnNumber: 21
                                                 }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$button$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Button"], {
                                                     type: "submit",
-                                                    disabled: isSubmitting,
+                                                    disabled: isSubmitting || !form.formState.isValid,
                                                     className: "min-w-[120px]",
                                                     children: isSubmitting ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
                                                         children: [
@@ -2926,7 +2992,7 @@ function LandlordRegistration() {
                                                                 className: "h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 881,
+                                                                lineNumber: 981,
                                                                 columnNumber: 27
                                                             }, this),
                                                             "Creating Account..."
@@ -2937,7 +3003,7 @@ function LandlordRegistration() {
                                                                 className: "h-4 w-4 mr-2"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                                lineNumber: 886,
+                                                                lineNumber: 986,
                                                                 columnNumber: 27
                                                             }, this),
                                                             "Complete Registration"
@@ -2945,13 +3011,13 @@ function LandlordRegistration() {
                                                     }, void 0, true)
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 874,
+                                                    lineNumber: 974,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 853,
+                                            lineNumber: 953,
                                             columnNumber: 17
                                         }, this),
                                         currentStep === 4 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2967,7 +3033,7 @@ function LandlordRegistration() {
                                                         children: "Terms of Service"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 898,
+                                                        lineNumber: 998,
                                                         columnNumber: 23
                                                     }, this),
                                                     ' ',
@@ -2979,23 +3045,23 @@ function LandlordRegistration() {
                                                         children: "Privacy Policy"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 902,
+                                                        lineNumber: 1002,
                                                         columnNumber: 23
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 896,
+                                                lineNumber: 996,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 895,
+                                            lineNumber: 995,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$separator$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Separator"], {}, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 909,
+                                            lineNumber: 1009,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3011,40 +3077,40 @@ function LandlordRegistration() {
                                                         children: "Sign in here"
                                                     }, void 0, false, {
                                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                                        lineNumber: 914,
+                                                        lineNumber: 1014,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 912,
+                                                lineNumber: 1012,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/components/SignUpadmin.tsx",
-                                            lineNumber: 911,
+                                            lineNumber: 1011,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 852,
+                                    lineNumber: 952,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 832,
+                            lineNumber: 932,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/components/SignUpadmin.tsx",
-                        lineNumber: 831,
+                        lineNumber: 931,
                         columnNumber: 11
                     }, this)
                 }, void 0, false, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 830,
+                    lineNumber: 930,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3064,12 +3130,12 @@ function LandlordRegistration() {
                                                     className: "h-5 w-5 text-blue-600"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 930,
+                                                    lineNumber: 1030,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 929,
+                                                lineNumber: 1029,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -3077,13 +3143,13 @@ function LandlordRegistration() {
                                                 children: "Online Rent Collection"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 932,
+                                                lineNumber: 1032,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 928,
+                                        lineNumber: 1028,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3091,18 +3157,18 @@ function LandlordRegistration() {
                                         children: "Accept rent payments online with automated reminders and receipts"
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 934,
+                                        lineNumber: 1034,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 927,
+                                lineNumber: 1027,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 926,
+                            lineNumber: 1026,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -3119,12 +3185,12 @@ function LandlordRegistration() {
                                                     className: "h-5 w-5 text-purple-600"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 944,
+                                                    lineNumber: 1044,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 943,
+                                                lineNumber: 1043,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -3132,13 +3198,13 @@ function LandlordRegistration() {
                                                 children: "Digital Documentation"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 946,
+                                                lineNumber: 1046,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 942,
+                                        lineNumber: 1042,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3146,18 +3212,18 @@ function LandlordRegistration() {
                                         children: "Store leases, contracts, and important documents securely in the cloud"
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 948,
+                                        lineNumber: 1048,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 941,
+                                lineNumber: 1041,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 940,
+                            lineNumber: 1040,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$components$2f$ui$2f$card$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Card"], {
@@ -3174,12 +3240,12 @@ function LandlordRegistration() {
                                                     className: "h-5 w-5 text-green-600"
                                                 }, void 0, false, {
                                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                                    lineNumber: 958,
+                                                    lineNumber: 1058,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 957,
+                                                lineNumber: 1057,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -3187,13 +3253,13 @@ function LandlordRegistration() {
                                                 children: "Tenant Communication"
                                             }, void 0, false, {
                                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                                lineNumber: 960,
+                                                lineNumber: 1060,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 956,
+                                        lineNumber: 1056,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3201,24 +3267,24 @@ function LandlordRegistration() {
                                         children: "Message tenants directly and manage maintenance requests efficiently"
                                     }, void 0, false, {
                                         fileName: "[project]/components/SignUpadmin.tsx",
-                                        lineNumber: 962,
+                                        lineNumber: 1062,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/components/SignUpadmin.tsx",
-                                lineNumber: 955,
+                                lineNumber: 1055,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 954,
+                            lineNumber: 1054,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 925,
+                    lineNumber: 1025,
                     columnNumber: 9
                 }, this),
                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3231,7 +3297,7 @@ function LandlordRegistration() {
                                     className: "h-4 w-4 text-green-600"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 972,
+                                    lineNumber: 1072,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3239,13 +3305,13 @@ function LandlordRegistration() {
                                     children: "Your data is encrypted and secured with bank-level security"
                                 }, void 0, false, {
                                     fileName: "[project]/components/SignUpadmin.tsx",
-                                    lineNumber: 973,
+                                    lineNumber: 1073,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 971,
+                            lineNumber: 1071,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3257,24 +3323,24 @@ function LandlordRegistration() {
                             ]
                         }, void 0, true, {
                             fileName: "[project]/components/SignUpadmin.tsx",
-                            lineNumber: 977,
+                            lineNumber: 1077,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/components/SignUpadmin.tsx",
-                    lineNumber: 970,
+                    lineNumber: 1070,
                     columnNumber: 9
                 }, this)
             ]
         }, void 0, true, {
             fileName: "[project]/components/SignUpadmin.tsx",
-            lineNumber: 776,
+            lineNumber: 876,
             columnNumber: 7
         }, this)
     }, void 0, false, {
         fileName: "[project]/components/SignUpadmin.tsx",
-        lineNumber: 775,
+        lineNumber: 875,
         columnNumber: 5
     }, this);
 }

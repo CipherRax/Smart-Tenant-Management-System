@@ -8340,3 +8340,418 @@ https://nextjs.org/docs/messages/module-not-found
 [02:39:33.259] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [02:39:34.822] Browser LOG     Supabase URL exists: true
 [02:39:34.822] Browser LOG     Supabase Key exists: true
+[02:44:04.739] Server  LOG     Supabase URL exists: true
+[02:44:04.742] Server  LOG     Supabase Key exists: true
+[02:44:06.816] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:44:06.816] Browser LOG     Supabase URL exists: true
+[02:44:06.817] Browser LOG     Supabase Key exists: true
+[02:44:07.512] Browser LOG     Session test: {"session":{"session":null},"sessionError":null}
+[02:44:08.226] Browser LOG     DB test: {"dbError":{"code":"42P17","details":null,"hint":null,"message":"infinite recursion detected in policy for relation \"admin\""},"dbTest":null}
+[02:47:26.890] Server  LOG      ✓ Compiled in 5.6s
+[02:47:26.995] Server  WARN     ⚠ Fast Refresh had to perform a full reload when ./app/test/page.tsx changed. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+[02:47:30.340] Server  LOG     Supabase URL exists: true
+[02:47:30.344] Server  LOG     Supabase Key exists: true
+[02:47:34.238] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:47:34.738] Browser LOG     Supabase URL exists: true
+[02:47:34.738] Browser LOG     Supabase Key exists: true
+[02:48:28.978] Browser LOG     Starting registration test...
+[02:48:28.978] Browser LOG     1. Attempting to sign up: john@gmail.cm
+[02:48:30.695] Browser LOG     ❌ Auth Error: Email address "john@gmail.cm" is invalid
+[02:48:40.927] Browser LOG     Starting registration test...
+[02:48:40.928] Browser LOG     1. Attempting to sign up: john5@gmail.cm
+[02:48:42.723] Browser LOG     ✅ Auth Success! User ID: 8a5949ff-2226-4338-8d95-0764aa2d8f72
+[02:48:42.723] Browser LOG     User email: john5@gmail.cm
+[02:48:42.724] Browser LOG     Session: No session (email verification required)
+[02:48:42.724] Browser LOG     2. Attempting to insert into admin table...
+[02:48:42.724] Browser LOG     Admin data to insert: {
+  "id": "8a5949ff-2226-4338-8d95-0764aa2d8f72",
+  "full_name": "John smith",
+  "email": "john5@gmail.cm",
+  "phone_number": "1234567890",
+  "role": "admin",
+  "is_active": true,
+  "permissions": {
+    "can_create_users": true,
+    "can_delete_users": true,
+    "can_manage_properties": true,
+    "can_view_reports": true,
+    "can_manage_finances": true
+  }
+}
+[02:48:43.649] Browser LOG     ❌ Database Error: infinite recursion detected in policy for relation "admin"
+[02:48:43.650] Browser LOG     Error code: 42P17
+[02:48:43.650] Browser LOG     Error details: null
+[02:50:43.499] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:50:43.500] Browser LOG     Supabase URL exists: true
+[02:50:43.500] Browser LOG     Supabase Key exists: true
+[02:51:15.395] Browser LOG     Starting registration test...
+[02:51:15.395] Browser LOG     1. Attempting to sign up: john4@gmail.com
+[02:51:16.093] Browser LOG     ❌ Auth Error: Email address "john4@gmail.com" is invalid
+[02:51:36.655] Browser LOG     Starting registration test...
+[02:51:36.656] Browser LOG     1. Attempting to sign up: john47@gmail.com
+[02:51:38.013] Browser LOG     ✅ Auth Success! User ID: 8cf41a4d-5140-4ffd-809f-a39127afb358
+[02:51:38.014] Browser LOG     User email: john47@gmail.com
+[02:51:38.014] Browser LOG     Session: No session (email verification required)
+[02:51:38.014] Browser LOG     2. Attempting to insert into admin table...
+[02:51:38.014] Browser LOG     Admin data to insert: {
+  "id": "8cf41a4d-5140-4ffd-809f-a39127afb358",
+  "full_name": "John smith",
+  "email": "john47@gmail.com",
+  "phone_number": "1234567890",
+  "role": "admin",
+  "is_active": true,
+  "permissions": {
+    "can_create_users": true,
+    "can_delete_users": true,
+    "can_manage_properties": true,
+    "can_view_reports": true,
+    "can_manage_finances": true
+  }
+}
+[02:51:38.339] Browser LOG     ❌ Database Error: infinite recursion detected in policy for relation "admin"
+[02:51:38.339] Browser LOG     Error code: 42P17
+[02:51:38.339] Browser LOG     Error details: null
+[03:22:53.968] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:22:54.132] Browser LOG     Supabase URL exists: true
+[03:22:54.135] Browser LOG     Supabase Key exists: true
+[03:23:32.804] Browser LOG     Starting registration test...
+[03:23:32.805] Browser LOG     1. Attempting to sign up: john33@gmail.com
+[03:23:35.534] Browser LOG     ✅ Auth Success! User ID: 3d27c095-ba5b-4506-a895-c0cc37571e09
+[03:23:35.534] Browser LOG     User email: john33@gmail.com
+[03:23:35.534] Browser LOG     Session: No session (email verification required)
+[03:23:35.534] Browser LOG     2. Attempting to insert into admin table...
+[03:23:35.534] Browser LOG     Admin data to insert: {
+  "id": "3d27c095-ba5b-4506-a895-c0cc37571e09",
+  "full_name": "Test John SmithUser",
+  "email": "john33@gmail.com",
+  "phone_number": "1234567890",
+  "role": "admin",
+  "is_active": true,
+  "permissions": {
+    "can_create_users": true,
+    "can_delete_users": true,
+    "can_manage_properties": true,
+    "can_view_reports": true,
+    "can_manage_finances": true
+  }
+}
+[03:23:36.034] Browser LOG     ❌ Database Error: infinite recursion detected in policy for relation "admin"
+[03:23:36.034] Browser LOG     Error code: 42P17
+[03:23:36.035] Browser LOG     Error details: null
+[03:28:22.243] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:28:22.243] Browser LOG     Supabase URL exists: true
+[03:28:22.243] Browser LOG     Supabase Key exists: true
+[03:29:00.525] Browser LOG     Starting registration test...
+[03:29:00.526] Browser LOG     1. Attempting to sign up: john34@gmail.com
+[03:29:02.883] Browser LOG     ✅ Auth Success! User ID: c2789478-7d24-4486-884b-f50cbb9a385b
+[03:29:02.884] Browser LOG     User email: john34@gmail.com
+[03:29:02.884] Browser LOG     Session: No session (email verification required)
+[03:29:02.884] Browser LOG     2. Attempting to insert into admin table...
+[03:29:02.884] Browser LOG     Admin data to insert: {
+  "id": "c2789478-7d24-4486-884b-f50cbb9a385b",
+  "full_name": "John Test",
+  "email": "john34@gmail.com",
+  "phone_number": "1234567890",
+  "role": "admin",
+  "is_active": true,
+  "permissions": {
+    "can_create_users": true,
+    "can_delete_users": true,
+    "can_manage_properties": true,
+    "can_view_reports": true,
+    "can_manage_finances": true
+  }
+}
+[03:29:03.440] Browser LOG     ❌ Database Error: infinite recursion detected in policy for relation "admin"
+[03:29:03.440] Browser LOG     Error code: 42P17
+[03:29:03.440] Browser LOG     Error details: null
+[03:29:35.704] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:29:36.740] Browser LOG     Supabase URL exists: true
+[03:29:36.740] Browser LOG     Supabase Key exists: true
+[03:29:38.589] Browser LOG     Starting registration test...
+[03:29:38.589] Browser LOG     1. Attempting to sign up: test@example.com
+[03:29:38.976] Browser LOG     ❌ Auth Error: Email address "test@example.com" is invalid
+[03:29:46.249] Browser LOG     Starting registration test...
+[03:29:46.249] Browser LOG     1. Attempting to sign up: test9@example.com
+[03:29:46.664] Browser LOG     ❌ Auth Error: Email address "test9@example.com" is invalid
+[03:29:59.825] Browser LOG     Starting registration test...
+[03:29:59.825] Browser LOG     1. Attempting to sign up: test9@gmail.com
+[03:30:00.222] Browser LOG     ❌ Auth Error: Email address "test9@gmail.com" is invalid
+[03:30:18.046] Browser LOG     Starting registration test...
+[03:30:18.046] Browser LOG     1. Attempting to sign up: john23@gmail.com
+[03:30:19.363] Browser LOG     ✅ Auth Success! User ID: b04ad9a3-f1b7-496e-ad0f-a70612fb0043
+[03:30:19.363] Browser LOG     User email: john23@gmail.com
+[03:30:19.363] Browser LOG     Session: No session (email verification required)
+[03:30:19.363] Browser LOG     2. Attempting to insert into admin table...
+[03:30:19.363] Browser LOG     Admin data to insert: {
+  "id": "b04ad9a3-f1b7-496e-ad0f-a70612fb0043",
+  "full_name": "Test User",
+  "email": "john23@gmail.com",
+  "phone_number": "1234567890",
+  "role": "admin",
+  "is_active": true,
+  "permissions": {
+    "can_create_users": true,
+    "can_delete_users": true,
+    "can_manage_properties": true,
+    "can_view_reports": true,
+    "can_manage_finances": true
+  }
+}
+[03:30:19.667] Browser LOG     ✅ Database Success! Inserted record: {
+  "id": "b04ad9a3-f1b7-496e-ad0f-a70612fb0043",
+  "full_name": "Test User",
+  "email": "john23@gmail.com",
+  "phone_number": "1234567890",
+  "national_id": null,
+  "role": "admin",
+  "profile_image_url": null,
+  "is_active": true,
+  "permissions": {
+    "can_create_users": true,
+    "can_delete_users": true,
+    "can_view_reports": true,
+    "can_manage_finances": true,
+    "can_manage_properties": true
+  },
+  "created_at": "2025-12-21T10:02:39.421313+00:00",
+  "updated_at": "2025-12-21T10:02:39.421313+00:00"
+}
+[03:30:19.667] Browser LOG     3. Verifying the insert...
+[03:30:20.078] Browser LOG     ✅ Verification Success! Found record: {
+  "id": "b04ad9a3-f1b7-496e-ad0f-a70612fb0043",
+  "full_name": "Test User",
+  "email": "john23@gmail.com",
+  "phone_number": "1234567890",
+  "national_id": null,
+  "role": "admin",
+  "profile_image_url": null,
+  "is_active": true,
+  "permissions": {
+    "can_create_users": true,
+    "can_delete_users": true,
+    "can_view_reports": true,
+    "can_manage_finances": true,
+    "can_manage_properties": true
+  },
+  "created_at": "2025-12-21T10:02:39.421313+00:00",
+  "updated_at": "2025-12-21T10:02:39.421313+00:00"
+}
+[03:30:20.078] Browser LOG     4. Checking current session...
+[03:30:20.078] Browser LOG     Current session: No session
+[03:30:20.079] Browser LOG     🎉 All tests completed successfully!
+[03:32:11.559] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:32:12.248] Browser LOG     Supabase URL exists: true
+[03:32:12.248] Browser LOG     Supabase Key exists: true
+[03:38:48.243] Server  LOG      ✓ Compiled in 1908ms
+[03:39:06.055] Server  LOG     Supabase URL exists: true
+[03:39:06.062] Server  LOG     Supabase Key exists: true
+[03:39:08.064] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:39:08.507] Browser LOG     Supabase URL exists: true
+[03:39:08.507] Browser LOG     Supabase Key exists: true
+[03:43:44.627] Server  LOG      ✓ Compiled in 942ms
+[03:43:50.916] Server  LOG      ✓ Compiled in 3.1s
+[03:45:24.997] Server  LOG     Supabase URL exists: true
+[03:45:25.005] Server  LOG     Supabase Key exists: true
+[03:45:27.591] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:45:28.279] Browser LOG     Supabase URL exists: true
+[03:45:28.279] Browser LOG     Supabase Key exists: true
+[03:52:19.792] Server  LOG      ✓ Compiled in 1657ms
+[03:52:30.626] Server  LOG     Supabase URL exists: true
+[03:52:30.671] Server  LOG     Supabase Key exists: true
+[03:52:36.268] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[03:52:37.346] Browser LOG     Supabase URL exists: true
+[03:52:37.346] Browser LOG     Supabase Key exists: true
+[03:59:00.778] Server  LOG      ✓ Compiled in 2.7s
+[04:02:18.311] Server  LOG      ✓ Compiled in 5.6s
+[04:02:19.040] Browser ERROR   ./components/SignUpadmin.tsx:784:14
+Parsing ecmascript source code failed
+  782 |       />
+  783 |               </div>
+> 784 |             </div>
+      |              ^^^^^
+  785 |
+  786 |             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+  787 |               <div className="flex gap-3">
+
+Unterminated regexp literal
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:03:11.689] Server  LOG      ✓ Compiled in 1322ms
+[04:03:14.959] Browser ERROR   In HTML, %s cannot be a descendant of <%s>.
+This will cause a hydration error.%s <div> p 
+
+  ...
+    <FormProvider control={{...}} subscribe={function subscribe} trigger={function trigger} register={function register} ...>
+      <form onSubmit={function}>
+        <Card className="border-0 s...">
+          <div data-slot="card" className="bg-card te...">
+            <CardHeader>
+            <CardContent className="pt-6">
+              <div data-slot="card-content" className="px-6 pt-6">
+                <div className="space-y-6">
+                  <div>
+                  <Alert>
+                  <FormField control={{...}} name="password" render={function render}>
+                    <Controller control={{...}} name="password" render={function render}>
+                      <FormItem>
+                        <div data-slot="form-item" className="grid gap-2">
+                          <FormLabel>
+                          <FormControl>
+                          <FormDescription>
+>                           <p
+>                             data-slot="form-description"
+>                             id="_R_ematpesndlb_-form-item-description"
+>                             className="text-muted-foreground text-sm"
+>                           >
+                              <div className="mt-2">
+                                <div className="flex items...">
+>                                 <div className="h-1 flex-1 rounded bg-green-500">
+                                  ...
+                                ...
+                          ...
+                  ...
+            ...
+
+[04:03:14.960] Browser ERROR   <%s> cannot contain a nested %s.
+See this log for the ancestor stack trace. p <div>
+[04:04:04.499] Server  LOG      ✓ Compiled in 814ms
+[04:04:04.706] Browser ERROR   ./components/SignUpadmin.tsx:784:14
+Parsing ecmascript source code failed
+  782 |       />
+  783 |               </div>
+> 784 |             </div>
+      |              ^^^^^
+  785 |
+  786 |             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+  787 |               <div className="flex gap-3">
+
+Unterminated regexp literal
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:04:09.809] Server  LOG      ✓ Compiled in 2.9s
+[04:04:27.712] Server  LOG      ✓ Compiled in 3.8s
+[04:04:28.196] Browser ERROR   ./components/SignUpadmin.tsx:784:14
+Parsing ecmascript source code failed
+  782 |       />
+  783 |               </div>
+> 784 |             </div>
+      |              ^^^^^
+  785 |
+  786 |             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+  787 |               <div className="flex gap-3">
+
+Unterminated regexp literal
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:04:51.101] Server  LOG      ✓ Compiled in 3s
+[04:04:51.243] Browser ERROR   ./components/SignUpadmin.tsx:781:11
+Parsing ecmascript source code failed
+  779 |             <FormMessage />
+  780 |           </FormItem>
+> 781 |         )};
+      |           ^
+  782 |       />
+  783 |               </div>
+  784 |             </div>
+
+Expected '</', got ';'
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:04:57.103] Browser ERROR   ./components/SignUpadmin.tsx:781:10
+Parsing ecmascript source code failed
+  779 |             <FormMessage />
+  780 |           </FormItem>
+> 781 |         );}
+      |          ^
+  782 |       />
+  783 |               </div>
+  784 |             </div>
+
+Expected '</', got ';'
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:05:13.810] Server  LOG      ✓ Compiled in 2.7s
+[04:05:13.982] Browser ERROR   ./components/SignUpadmin.tsx:784:14
+Parsing ecmascript source code failed
+  782 |       />
+  783 |               </div>
+> 784 |             </div>
+      |              ^^^^^
+  785 |
+  786 |             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+  787 |               <div className="flex gap-3">
+
+Unterminated regexp literal
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:05:19.288] Server  LOG      ✓ Compiled in 2.6s
+[04:05:19.401] Browser ERROR   ./components/SignUpadmin.tsx:786:18
+Parsing ecmascript source code failed
+  784 |             // </div>
+  785 |
+> 786 |             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      |                  ^^^^^^^^^
+  787 |               <div className="flex gap-3">
+  788 |                 <Shield className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+  789 |                 <div>
+
+Expected ',', got 'className'
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:05:23.054] Server  LOG      ✓ Compiled in 1371ms
+[04:05:23.112] Browser ERROR   ./components/SignUpadmin.tsx:784:14
+Parsing ecmascript source code failed
+  782 |       />
+  783 |               </div>
+> 784 |             </div>
+      |              ^^^^^
+  785 |
+  786 |             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+  787 |               <div className="flex gap-3">
+
+Unterminated regexp literal
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:06:26.357] Server  LOG      ✓ Compiled in 1987ms
+[04:06:26.476] Browser ERROR   ./components/SignUpadmin.tsx:786:18
+Parsing ecmascript source code failed
+  784 |             // </div>
+  785 |
+> 786 |             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      |                  ^^^^^^^^^
+  787 |               <div className="flex gap-3">
+  788 |                 <Shield className="h-5 w-5 text-yellow-600 flex-shrink-0" />
+  789 |                 <div>
+
+Expected ',', got 'className'
+
+Import trace:
+  Server Component:
+    ./components/SignUpadmin.tsx
+    ./app/(auth)/signIn/page.tsx
+[04:06:45.282] Server  LOG      ✓ Compiled in 2.5s

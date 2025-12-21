@@ -41,12 +41,11 @@ import {
   Globe,
   CreditCard,
   FileText,
-  Upload,
   MapPin,
   Briefcase
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Form validation schema
@@ -85,9 +84,133 @@ const registrationSchema = z.object({
 
 type RegistrationFormValues = z.infer<typeof registrationSchema>;
 
+// Registration helper function
+async function registerAdminUser(userData: {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+  userType: 'landlord' | 'property_manager';
+  companyName?: string;
+}) {
+  const supabase = createClient();
+
+  try {
+    console.log('Starting registration for:', userData.email);
+
+    // 1. Create auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.password,
+      options: {
+        data: {
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          phone: userData.phone,
+          user_type: userData.userType,
+        },
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (authError) {
+      console.error('Auth error:', authError);
+      throw new Error(`Registration failed: ${authError.message}`);
+    }
+
+    if (!authData.user) {
+      throw new Error('User creation failed. Please try again.');
+    }
+
+    console.log('Auth user created:', authData.user.id);
+
+    // 2. Create admin profile
+    const adminData = {
+      id: authData.user.id,
+      full_name: `${userData.firstName} ${userData.lastName}`,
+      email: userData.email,
+      phone_number: userData.phone,
+      role: userData.userType === 'property_manager' ? 'manager' : 'landlord',
+      is_active: true,
+      permissions: {
+        can_create_users: true,
+        can_delete_users: true,
+        can_manage_properties: true,
+        can_view_reports: true,
+        can_manage_finances: true,
+      },
+    };
+
+    console.log('Inserting admin data:', adminData);
+
+    // Try to insert with retry logic
+    let retryCount = 0;
+    const maxRetries = 3;
+    let dbError = null;
+
+    while (retryCount < maxRetries) {
+      const { error } = await supabase
+        .from('admin')
+        .insert(adminData);
+
+      if (!error) {
+        console.log('Admin profile created successfully');
+        break;
+      }
+
+      dbError = error;
+      console.log(`Insert attempt ${retryCount + 1} failed:`, error.message);
+      
+      // Wait before retry (exponential backoff)
+      await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+      retryCount++;
+    }
+
+    if (dbError) {
+      console.error('All insert attempts failed:', dbError);
+      
+      // If database insert fails, try to sign in and then insert
+      console.log('Trying alternative approach...');
+      
+      // Sign in to create a session
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password: userData.password,
+      });
+
+      if (signInError) {
+        throw new Error(`Could not create profile: ${dbError.message}`);
+      }
+
+      // Try insert again with active session
+      const { error: finalError } = await supabase
+        .from('admin')
+        .insert(adminData);
+
+      if (finalError) {
+        throw new Error(`Could not create profile: ${finalError.message}`);
+      }
+    }
+
+    return {
+      success: true,
+      userId: authData.user.id,
+      email: authData.user.email,
+      needsEmailVerification: !authData.session,
+    };
+
+  } catch (error: any) {
+    console.error('Registration error:', error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+}
+
 export default function LandlordRegistration() {
   const router = useRouter();
-  // const { toast } = useToast();
   const supabase = createClient();
   
   const [showPassword, setShowPassword] = useState(false);
@@ -161,88 +284,63 @@ export default function LandlordRegistration() {
     setIsSubmitting(true);
     setError(null);
     setSuccess(null);
-    
+
     try {
-      // Step 1: Create authentication user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const result = await registerAdminUser({
         email: data.email,
         password: data.password,
-        options: {
-          data: {
-            first_name: data.firstName,
-            last_name: data.lastName,
-            phone: data.phone,
-            user_type: data.userType,
-            company_name: data.companyName || null,
-          },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        firstName: data.firstName,
+        lastName: data.lastName,
+        phone: data.phone,
+        userType: data.userType,
+        companyName: data.companyName,
       });
 
-      if (authError) {
-        throw new Error(`Authentication error: ${authError.message}`);
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
-      if (!authData.user) {
-        throw new Error('User creation failed. Please try again.');
+      // Show success toast
+      toast.success(
+        result.needsEmailVerification 
+          ? "Registration successful! Please check your email to verify your account."
+          : "Registration successful! Redirecting to dashboard...",
+        {
+          duration: 5000,
+        }
+      );
+
+      // Redirect based on email verification status
+      if (result.needsEmailVerification) {
+        localStorage.setItem('pendingVerificationEmail', data.email);
+        setTimeout(() => router.push('/auth/verify'), 2000);
+      } else {
+        setTimeout(() => router.push('/dashboard'), 2000);
       }
-
-      // Step 2: Create admin profile in the database
-      const adminData = {
-        id: authData.user.id,
-        full_name: `${data.firstName} ${data.lastName}`,
-        email: data.email,
-        phone_number: data.phone,
-        role: data.userType === 'property_manager' ? 'manager' : 'landlord',
-        is_active: true,
-        permissions: {
-          can_create_users: true,
-          can_delete_users: true,
-          can_manage_properties: true,
-          can_view_reports: true,
-          can_manage_finances: true,
-        },
-      };
-
-      const { error: dbError } = await supabase
-        .from('admin')
-        .insert([adminData] as any);
-
-      if (dbError) {
-        // If database insert fails, try to delete the auth user
-        await supabase.auth.admin.deleteUser(authData.user.id);
-        throw new Error(`Database error: ${dbError.message}`);
-      }
-
-      // Step 3: Show success message
-      setSuccess('Account created successfully!');
-      
-     toast.success("Registration successful!", {
-  description: "Please check your email to verify your account.",
-  duration: 5000,
-})
-
-      // Step 4: Store registration data in localStorage for the verification page
-      const registrationData = {
-        ...data,
-        userId: authData.user.id,
-      };
-      localStorage.setItem('adminRegistrationData', JSON.stringify(registrationData));
-
-      // Step 5: Redirect to verification page
-      setTimeout(() => {
-        router.push('/auth/verify');
-      }, 2000);
 
     } catch (error: any) {
       console.error('Registration error:', error);
-      setError(error.message || 'An error occurred during registration');
       
-     toast.error("Registration failed", {
-  description:
-    error.message || "Please try again or contact support.",
-  duration: 5000,
-})
+      // User-friendly error messages
+      let userMessage = error.message;
+      
+      if (error.message.includes('User already registered')) {
+        userMessage = 'This email is already registered. Please try logging in instead.';
+      } else if (error.message.includes('password')) {
+        userMessage = 'Password does not meet requirements. Please try a different password.';
+      } else if (error.message.includes('network') || error.message.includes('fetch')) {
+        userMessage = 'Network error. Please check your internet connection and try again.';
+      } else if (error.message.includes('permission')) {
+        userMessage = 'Registration is currently restricted. Please contact support.';
+      }
+
+      setError(userMessage);
+      
+      toast.error("Registration failed", {
+        description: userMessage,
+        duration: 5000,
+      });
+
     } finally {
       setIsSubmitting(false);
     }
@@ -454,13 +552,15 @@ export default function LandlordRegistration() {
                         {...field} 
                         disabled={isSubmitting}
                         onBlur={async (e) => {
-                          if (e.target.value) {
+                          if (e.target.value && !isSubmitting) {
                             const exists = await checkEmailExists(e.target.value);
                             if (exists) {
                               form.setError('email', {
                                 type: 'manual',
                                 message: 'This email is already registered',
                               });
+                            } else {
+                              form.clearErrors('email');
                             }
                           }
                         }}
@@ -873,7 +973,7 @@ export default function LandlordRegistration() {
                   ) : (
                     <Button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !form.formState.isValid}
                       className="min-w-[120px]"
                     >
                       {isSubmitting ? (

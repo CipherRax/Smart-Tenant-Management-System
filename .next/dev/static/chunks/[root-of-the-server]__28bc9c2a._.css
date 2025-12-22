@@ -2202,6 +2202,10 @@
     }
   }
 
+  .border-blue-600 {
+    border-color: var(--color-blue-600);
+  }
+
   .border-border\/50 {
     border-color: var(--border);
   }
@@ -2426,10 +2430,6 @@
 
   .bg-gray-100 {
     background-color: var(--color-gray-100);
-  }
-
-  .bg-gray-200 {
-    background-color: var(--color-gray-200);
   }
 
   .bg-gray-300 {
@@ -3125,6 +3125,10 @@
 
   .break-words {
     overflow-wrap: break-word;
+  }
+
+  .break-all {
+    word-break: break-all;
   }
 
   .whitespace-nowrap {

@@ -1,12 +1,6 @@
 {
-  "/(auth)/login/page": "app/(auth)/login/page.js",
   "/(auth)/signIn/page": "app/(auth)/signIn/page.js",
-  "/(dashboard)/Dashboard/communication/page": "app/(dashboard)/Dashboard/communication/page.js",
-  "/(dashboard)/Dashboard/page": "app/(dashboard)/Dashboard/page.js",
-  "/(dashboard)/Dashboard/report/page": "app/(dashboard)/Dashboard/report/page.js",
-  "/(dashboard)/Dashboard/transaction/page": "app/(dashboard)/Dashboard/transaction/page.js",
-  "/(users)/users/page": "app/(users)/users/page.js",
-  "/(users)/users/rent/page": "app/(users)/users/rent/page.js",
+  "/(auth)/verify/page": "app/(auth)/verify/page.js",
   "/_not-found/page": "app/_not-found/page.js",
   "/page": "app/page.js",
   "/test/page": "app/test/page.js"

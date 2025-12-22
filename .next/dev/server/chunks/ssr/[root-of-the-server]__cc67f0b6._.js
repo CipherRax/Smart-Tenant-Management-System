@@ -56,7 +56,7 @@ __turbopack_context__.n(__TURBOPACK__imported__module__$5b$project$5d2f$componen
 "[project]/app/(auth)/signIn/page.tsx [app-rsc] (ecmascript)", ((__turbopack_context__) => {
 "use strict";
 
-// import LandlordRegistration from '@/components/SignUpadmin';
+// import LandlordRegistration from '@/components/SignUpadminTwo';
 __turbopack_context__.s([
     "default",
     ()=>__TURBOPACK__default__export__

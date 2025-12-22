@@ -2,5 +2,5 @@
   "version": 3,
   "sources": [],
   "sections": [
-    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28auth%29/signIn/page.tsx"],"sourcesContent":["import LandlordRegistration from '@/components/SignUpadmin';\n\n\nconst SingUpPage = () => {\n    return (\n        <>\n        {/* <LandlordRegistration /> */}\n        <AdminLoginPage />\n        </>\n      \n    );\n};\n\nexport default SingUpPage;"],"names":[],"mappings":";;;;;;AAGA,MAAM,aAAa;IACf,qBACI;kBAEA,cAAA,8OAAC;;;;;;AAIT;uCAEe"}}]
+    {"offset": {"line": 22, "column": 0}, "map": {"version":3,"sources":["file:///home/stanslaus/Documents/projects/Smart-Tenant-Management-System/app/%28auth%29/signIn/page.tsx"],"sourcesContent":["// import LandlordRegistration from '@/components/SignUpadminTwo';\nimport AdminLoginPage from '@/components/SignUpadmin';\n\n\nconst SingUpPage = () => {\n    return (\n        <>\n        <LandlordRegistration />\n        {/* <AdminLoginPage /> */}\n        </>\n      \n    );\n};\n\nexport default SingUpPage;"],"names":[],"mappings":"AAAA,kEAAkE;;;;;;;AAIlE,MAAM,aAAa;IACf,qBACI;kBACA,cAAA,8OAAC;;;;;;AAKT;uCAEe"}}]
 }

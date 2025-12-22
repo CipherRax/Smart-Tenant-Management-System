@@ -1,4 +1,4 @@
-// import LandlordRegistration from '@/components/SignUpadmin';
+// import LandlordRegistration from '@/components/SignUpadminTwo';
 import AdminLoginPage from '@/components/SignUpadmin';
 
 

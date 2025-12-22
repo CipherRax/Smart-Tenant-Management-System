@@ -1,55 +1,161 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, Mail, RefreshCw, ArrowRight, Shield } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
+import { toast } from 'sonner';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
-  const [email, setEmail] = useState<string>(() => {
-    // Get registration data from localStorage
-    const registrationData = localStorage.getItem('adminRegistrationData');
-    if (registrationData) {
-      const data = JSON.parse(registrationData);
-      return data.email;
-    }
-    return '';
-  });
+  const searchParams = useSearchParams();
+  const supabase = createClient();
+  
+  const [email, setEmail] = useState<string>('');
   const [isResending, setIsResending] = useState(false);
   const [resendSuccess, setResendSuccess] = useState(false);
+  const [hasCheckedStorage, setHasCheckedStorage] = useState(false);
 
   useEffect(() => {
-    // If no registration data, redirect to signup
-    const registrationData = localStorage.getItem('adminRegistrationData');
-    if (!registrationData) {
-      router.push('/auth/signup');
+    // Get email from URL params first
+    const emailFromParams = searchParams.get('email');
+    
+    if (emailFromParams) {
+      setEmail(emailFromParams);
+      // Store it in localStorage for future reference
+      localStorage.setItem('adminRegistrationData', JSON.stringify({ 
+        email: emailFromParams,
+        timestamp: new Date().toISOString()
+      }));
+      setHasCheckedStorage(true);
+      return;
     }
-  }, [router]);
+
+    // If no URL param, check localStorage
+    try {
+      const registrationData = localStorage.getItem('adminRegistrationData');
+      if (registrationData) {
+        const data = JSON.parse(registrationData);
+        if (data.email) {
+          setEmail(data.email);
+        }
+      }
+    } catch (e) {
+      console.log('Error reading localStorage:', e);
+    }
+    
+    setHasCheckedStorage(true);
+  }, [searchParams]);
+
+  // Only redirect if we've checked and found no email
+  useEffect(() => {
+    if (hasCheckedStorage && !email) {
+      toast.info('No registration found. Please register first.');
+      setTimeout(() => {
+        router.push('/signIn');
+      }, 2000);
+    }
+  }, [hasCheckedStorage, email, router]);
 
   const handleResendEmail = async () => {
+    if (!email) {
+      toast.error('No email address found');
+      return;
+    }
+
     setIsResending(true);
     
-    // In a real app, you would call your API to resend verification email
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setResendSuccess(true);
-    setIsResending(false);
-    
-    // Hide success message after 3 seconds
-    setTimeout(() => {
-      setResendSuccess(false);
-    }, 3000);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+
+      if (error) {
+        console.error('Resend error:', error);
+        toast.error('Failed to resend verification email');
+      } else {
+        setResendSuccess(true);
+        toast.success('Verification email resent! Check your inbox.');
+        
+        setTimeout(() => {
+          setResendSuccess(false);
+        }, 5000);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('An error occurred');
+    } finally {
+      setIsResending(false);
+    }
   };
 
-  const handleGoToDashboard = () => {
-    // Clear registration data
-    localStorage.removeItem('adminRegistrationData');
-    router.push('/dashboard');
+  const handleCheckVerification = async () => {
+    if (!email) return;
+
+    toast.info('Checking verification status...');
+    
+    try {
+      // Try to sign in to see if account is active
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: 'dummy-password', // Will fail but show if account exists
+      });
+
+      // If we get here, the account might be verified
+      if (data?.user?.email_confirmed_at) {
+        toast.success('Email verified! You can now sign in.');
+        localStorage.removeItem('adminRegistrationData');
+        router.push('/signIn');
+      }
+    } catch (error: any) {
+      // Check error message to determine status
+      if (error.message?.includes('Invalid login credentials')) {
+        // Account exists but password is wrong - this is expected
+        toast.info('Account exists. Please use the verification link from your email.');
+      } else if (error.message?.includes('Email not confirmed')) {
+        toast.info('Email not confirmed yet. Please check your inbox.');
+      } else {
+        console.error('Check error:', error);
+      }
+    }
   };
+
+  const handleGoToSignIn = () => {
+    router.push('/signIn');
+  };
+
+  if (!hasCheckedStorage) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!email) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <h1 className="text-2xl font-bold mb-4">No Registration Found</h1>
+          <p className="mb-6">Please register first to verify your email.</p>
+          <Button onClick={() => router.push('/signIn')}>
+            Go to Sign In
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
@@ -73,7 +179,7 @@ export default function VerifyEmailPage() {
               We've sent a verification email to:
             </CardDescription>
             <div className="mt-2">
-              <p className="text-lg font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <p className="text-lg font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent break-all">
                 {email}
               </p>
             </div>
@@ -84,7 +190,8 @@ export default function VerifyEmailPage() {
               <CheckCircle className="h-4 w-4" />
               <AlertTitle>Important!</AlertTitle>
               <AlertDescription>
-                You must verify your email before you can access your dashboard.
+                <strong>Check your email inbox (and spam folder)</strong> for the verification link.
+                Click that link to verify your account.
               </AlertDescription>
             </Alert>
 
@@ -96,9 +203,9 @@ export default function VerifyEmailPage() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-medium">Check your inbox</h4>
+                  <h4 className="font-medium">Check your email</h4>
                   <p className="text-sm text-muted-foreground">
-                    Look for an email from TenantFlow with the subject "Verify your email address"
+                    Look for an email with subject "Confirm your signup"
                   </p>
                 </div>
               </div>
@@ -112,7 +219,7 @@ export default function VerifyEmailPage() {
                 <div>
                   <h4 className="font-medium">Click the verification link</h4>
                   <p className="text-sm text-muted-foreground">
-                    Click the link in the email to confirm your email address
+                    The link will take you back to our site to confirm your email
                   </p>
                 </div>
               </div>
@@ -124,9 +231,9 @@ export default function VerifyEmailPage() {
                   </div>
                 </div>
                 <div>
-                  <h4 className="font-medium">Access your dashboard</h4>
+                  <h4 className="font-medium">Sign in to your account</h4>
                   <p className="text-sm text-muted-foreground">
-                    Once verified, you'll be redirected to your dashboard automatically
+                    After verification, return here and click "Go to Sign In"
                   </p>
                 </div>
               </div>
@@ -164,71 +271,54 @@ export default function VerifyEmailPage() {
               </Button>
               
               <Button
-                onClick={handleGoToDashboard}
+                variant="ghost"
+                onClick={handleCheckVerification}
                 className="flex-1"
               >
-                Go to Dashboard
+                Check Verification Status
+              </Button>
+            </div>
+
+            <div className="w-full">
+              <Button
+                onClick={handleGoToSignIn}
+                className="w-full"
+              >
+                Go to Sign In
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
 
             <div className="text-center w-full pt-4 border-t">
               <p className="text-sm text-muted-foreground">
-                Didn't receive the email? Check your spam folder or{' '}
+                <strong>Important:</strong> You must click the verification link in the email.
+                Just checking your email is not enough.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2">
+                Didn't receive the email? Check spam or{' '}
                 <Button
                   variant="link"
                   className="p-0 h-auto text-primary"
                   onClick={handleResendEmail}
                   disabled={isResending}
                 >
-                  click here to resend
+                  resend
                 </Button>
               </p>
             </div>
           </CardFooter>
         </Card>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="border-0 shadow-sm">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <Shield className="h-5 w-5 text-blue-600" />
-                </div>
-                <h3 className="font-semibold">Security First</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Email verification ensures that only you can access your account and protects against unauthorized access.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-purple-100 rounded-lg">
-                  <Mail className="h-5 w-5 text-purple-600" />
-                </div>
-                <h3 className="font-semibold">Need Help?</h3>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                If you're having trouble verifying your email, please contact our support team.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground">
-            By verifying your email, you agree to our{' '}
-            <Link href="/terms" className="text-primary hover:underline">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
+            Need help? Make sure you:
           </p>
+          <ul className="text-sm text-muted-foreground mt-2 text-left max-w-md mx-auto">
+            <li className="mb-1">• Checked the correct email inbox</li>
+            <li className="mb-1">• Looked in the spam/junk folder</li>
+            <li className="mb-1">• Waited a few minutes for the email to arrive</li>
+            <li>• Used the same email you registered with</li>
+          </ul>
         </div>
       </div>
     </div>

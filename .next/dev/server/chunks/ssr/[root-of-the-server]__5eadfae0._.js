@@ -330,7 +330,22 @@ __turbopack_context__.s([
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$index$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__$3c$locals$3e$__ = __turbopack_context__.i("[project]/node_modules/@supabase/ssr/dist/module/index.js [app-ssr] (ecmascript) <locals>");
 var __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createBrowserClient$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/node_modules/@supabase/ssr/dist/module/createBrowserClient.js [app-ssr] (ecmascript)");
 ;
-const createClient = ()=>(0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createBrowserClient$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createBrowserClient"])(("TURBOPACK compile-time value", "https://idxaqqlngmfsujrvqxwb.supabase.co"), ("TURBOPACK compile-time value", "sb_publishable_jncibUQ6WacXrET4IiY-nA_enrRVrsS"));
+// Debug logging
+console.log('Supabase URL exists:', !!("TURBOPACK compile-time value", "https://idxaqqlngmfsujrvqxwb.supabase.co"));
+console.log('Supabase Key exists:', !!("TURBOPACK compile-time value", "sb_publishable_jncibUQ6WacXrET4IiY-nA_enrRVrsS"));
+const createClient = ()=>{
+    const supabaseUrl = ("TURBOPACK compile-time value", "https://idxaqqlngmfsujrvqxwb.supabase.co");
+    const supabaseKey = ("TURBOPACK compile-time value", "sb_publishable_jncibUQ6WacXrET4IiY-nA_enrRVrsS");
+    if ("TURBOPACK compile-time falsy", 0) //TURBOPACK unreachable
+    ;
+    return (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f40$supabase$2f$ssr$2f$dist$2f$module$2f$createBrowserClient$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["createBrowserClient"])(supabaseUrl, supabaseKey, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: true
+        }
+    });
+};
 }),
 "[project]/hooks/useAuth.ts [app-ssr] (ecmascript)", ((__turbopack_context__) => {
 "use strict";

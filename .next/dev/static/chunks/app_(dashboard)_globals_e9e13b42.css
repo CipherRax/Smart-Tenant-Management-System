@@ -1232,6 +1232,10 @@
     max-height: calc(var(--spacing) * 48);
   }
 
+  .max-h-60 {
+    max-height: calc(var(--spacing) * 60);
+  }
+
   .max-h-96 {
     max-height: calc(var(--spacing) * 96);
   }
@@ -1246,6 +1250,10 @@
 
   .max-h-\[400px\] {
     max-height: 400px;
+  }
+
+  .max-h-\[500px\] {
+    max-height: 500px;
   }
 
   .min-h-0 {
@@ -2102,6 +2110,10 @@
     }
   }
 
+  .border-blue-600 {
+    border-color: var(--color-blue-600);
+  }
+
   .border-border\/50 {
     border-color: var(--border);
   }
@@ -2128,6 +2140,10 @@
     .border-destructive\/50 {
       border-color: color-mix(in oklab, var(--destructive) 50%, transparent);
     }
+  }
+
+  .border-gray-100 {
+    border-color: var(--color-gray-100);
   }
 
   .border-gray-200 {
@@ -2204,6 +2220,10 @@
 
   .border-yellow-600 {
     border-color: var(--color-yellow-600);
+  }
+
+  .border-t-blue-600 {
+    border-top-color: var(--color-blue-600);
   }
 
   .border-t-transparent {
@@ -2290,6 +2310,10 @@
     .bg-blue-500\/20 {
       background-color: color-mix(in oklab, var(--color-blue-500) 20%, transparent);
     }
+  }
+
+  .bg-blue-600 {
+    background-color: var(--color-blue-600);
   }
 
   .bg-border {
@@ -3011,6 +3035,10 @@
     overflow-wrap: break-word;
   }
 
+  .break-all {
+    word-break: break-all;
+  }
+
   .whitespace-nowrap {
     white-space: nowrap;
   }
@@ -3247,10 +3275,6 @@
 
   .capitalize {
     text-transform: capitalize;
-  }
-
-  .uppercase {
-    text-transform: uppercase;
   }
 
   .italic {

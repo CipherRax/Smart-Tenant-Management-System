@@ -1,46 +1,68 @@
-// import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-// import { cookies } from 'next/headers'
-// import { NextResponse } from 'next/server'
-// import type { NextRequest } from 'next/server'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-// export async function GET(request: NextRequest) {
-//   const requestUrl = new URL(request.url)
-//   const code = requestUrl.searchParams.get('code')
-//   const error = requestUrl.searchParams.get('error')
-//   const errorDescription = requestUrl.searchParams.get('error_description')
+export const dynamic = 'force-dynamic'
 
-//   // Handle errors
-//   if (error) {
-//     console.error('Auth callback error:', error, errorDescription)
-//     return NextResponse.redirect(
-//       `${requestUrl.origin}/error?error=${encodeURIComponent(error)}`
-//     )
-//   }
+export async function GET(request: NextRequest) {
+  const requestUrl = new URL(request.url)
+  const code = requestUrl.searchParams.get('code')
+  const error = requestUrl.searchParams.get('error')
+  const errorDescription = requestUrl.searchParams.get('error_description')
 
-//   if (code) {
-//     const supabase = createRouteHandlerClient({ cookies })
+  if (error) {
+    console.error('Auth callback error:', error, errorDescription)
+    return NextResponse.redirect(
+      `${requestUrl.origin}/error?error=${encodeURIComponent(error)}`
+    )
+  }
+
+  if (code) {
+    const cookieStore = cookies()
     
-//     try {
-//       const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // The `setAll` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+        },
+      }
+    )
+    
+    try {
+      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
       
-//       if (exchangeError) {
-//         console.error('Exchange error:', exchangeError)
-//         return NextResponse.redirect(
-//           `${requestUrl.origin}/error?error=exchange_failed`
-//         )
-//       }
+      if (exchangeError) {
+        console.error('Exchange error:', exchangeError)
+        return NextResponse.redirect(
+          `${requestUrl.origin}/error?error=exchange_failed`
+        )
+      }
       
-//       // Success! Redirect to dashboard
-//       return NextResponse.redirect(`${requestUrl.origin}/Dashboard`)
+      return NextResponse.redirect(`${requestUrl.origin}/Dashboard`)
       
-//     } catch (error) {
-//       console.error('Unexpected error in callback:', error)
-//       return NextResponse.redirect(
-//         `${requestUrl.origin}/error?error=unexpected`
-//       )
-//     }
-//   }
+    } catch (error) {
+      console.error('Unexpected error in callback:', error)
+      return NextResponse.redirect(
+        `${requestUrl.origin}/error?error=unexpected`
+      )
+    }
+  }
 
-//   // No code provided, redirect to home
-//   return NextResponse.redirect(`${requestUrl.origin}`)
-// }
+  return NextResponse.redirect(`${requestUrl.origin}`)
+}
